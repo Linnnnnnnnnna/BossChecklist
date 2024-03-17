@@ -73,6 +73,34 @@ namespace BossChecklist
 
 		[Header("BossLogChecklist")]
 
+		[BackgroundColor(255, 99, 71)]
+		[LabelKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ManualChecklist.Label")]
+		[TooltipKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ManualChecklist.Tooltip")]
+		public bool ManualChecklist {
+			get => manual;
+			set {
+				manual = value;
+				if (value is true)
+					progressive = false;
+			}
+		}
+
+		[BackgroundColor(255, 99, 71)]
+		[LabelKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ProgressiveChecklist.Label")]
+		[TooltipKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ProgressiveChecklist.Tooltip")]
+		[DefaultValue(true)]
+		public bool ProgressiveChecklist {
+			get => progressive;
+			set {
+				progressive = value;
+				if (value is true)
+					manual = false;
+			}
+		}
+
+		private bool progressive = true;
+		private bool manual = false;
+
 		[BackgroundColor(250, 235, 215)]
 		[DefaultValue(true)]
 		public bool HideUnavailable { get; set; }

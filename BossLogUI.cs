@@ -1091,12 +1091,14 @@ namespace BossChecklist
 				// The first entry that isnt downed to have a nextCheck will set off the next check for the rest
 				// Entries that ARE downed will still be green due to the ordering of colors within the draw method
 				// Update marked downs. If the boss is actually downed, remove the mark.
-				if (entry.MarkedAsDowned) {
+				if (entry.MarkedAsDowned && !cfg.ManualChecklist) {
 					displayName += "*";
+					/*
 					if (WorldAssist.MarkedEntries.Contains(entry.Key) && entry.downed()) {
-						WorldAssist.MarkedEntries.Remove(entry.Key);
+						WorldAssist.MarkedEntries.Remove(entry.Key); // TODO: move this to a more apprpriate method
 						Networking.RequestMarkedEntryUpdate(entry.Key, entry.MarkedAsDowned);
 					}
+					*/
 				}
 
 				bool allLoot = BossChecklist.BossLogConfig.LootCheckVisibility;

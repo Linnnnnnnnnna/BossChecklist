@@ -1242,7 +1242,7 @@ namespace BossChecklist.UIElements
 					BossUISystem.Instance.bossChecklistUI.UpdateCheckboxes(); // update the legacy checklist
 					Networking.RequestHiddenEntryUpdate(entry.Key, entry.hidden);
 				}
-				else if (!entry.downed()) {
+				else {
 					// Entries must not already be downed to add/remove them from the MarkedEntries list
 					// Entries that are downed will automatically be removed from the lsit when the TableOfContents list is generated
 					if (WorldAssist.MarkedEntries.Contains(entry.Key)) {
@@ -1314,7 +1314,7 @@ namespace BossChecklist.UIElements
 				Asset<Texture2D> checkGrid = BossLogUI.Texture_Check_Box;
 				string checkType = BossChecklist.BossLogConfig.SelectedCheckmarkType;
 
-				if (entry.IsDownedOrMarked) {
+				if (entry.MarkedAsDowned || (!BossChecklist.BossLogConfig.ManualChecklist && entry.downed())) {
 					if (checkType == BossLogConfiguration.CheckType_XAndEmpty) {
 						checkGrid = BossLogUI.Texture_Check_X;
 					}
