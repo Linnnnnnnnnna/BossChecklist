@@ -1315,10 +1315,10 @@ namespace BossChecklist.UIElements
 				string checkType = BossChecklist.BossLogConfig.SelectedCheckmarkType;
 
 				if (entry.IsDownedOrMarked) {
-					if (checkType == "X and  ☐") {
+					if (checkType == BossLogConfiguration.CheckType_XAndEmpty) {
 						checkGrid = BossLogUI.Texture_Check_X;
 					}
-					else if (checkType != "Strike-through") {
+					else if (checkType != BossLogConfiguration.CheckType_StrikeThrough) {
 						checkGrid = BossLogUI.Texture_Check_Check;
 					}
 					else {
@@ -1344,16 +1344,14 @@ namespace BossChecklist.UIElements
 					}
 				}
 				else {
-					checkGrid = checkType == "✓ and  X" ? BossLogUI.Texture_Check_X : BossLogUI.Texture_Check_Box;
+					checkGrid = checkType == BossLogConfiguration.CheckType_CheckAndX ? BossLogUI.Texture_Check_X : BossLogUI.Texture_Check_Box;
 					if (markAsNext) {
-						checkGrid = checkType == "Strike-through" ? BossLogUI.Texture_Check_Strike : BossLogUI.Texture_Check_Next;
+						checkGrid = BossLogUI.Texture_Check_Next;
 					}
 				}
 
-				if ((checkType != "Strike-through" || checkGrid == BossLogUI.Texture_Check_Strike) && !entry.hidden) {
-					if (checkGrid != BossLogUI.Texture_Check_Strike) {
-						spriteBatch.Draw(BossLogUI.Texture_Check_Box.Value, pos, Color.White);
-					}
+				if (!entry.hidden && checkType != BossLogConfiguration.CheckType_StrikeThrough) {
+					spriteBatch.Draw(BossLogUI.Texture_Check_Box.Value, pos, Color.White);
 					spriteBatch.Draw(checkGrid.Value, pos, Color.White);
 				}
 			}

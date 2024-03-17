@@ -119,9 +119,14 @@ namespace BossChecklist
 		[SliderColor(87, 181, 92)]
 		[BackgroundColor(250, 235, 215)]
 		[DrawTicks]
-		[OptionStrings(new string[] { "✓  ☐", "✓  X", "X  ☐", "Strike-through" })]
-		[DefaultValue("✓  ☐")]
+		[OptionStrings(new string[] { CheckType_CheckAndEmpty, CheckType_CheckAndX, CheckType_XAndEmpty, CheckType_StrikeThrough })]
+		[DefaultValue(CheckType_CheckAndEmpty)]
 		public string SelectedCheckmarkType { get; set; }
+
+		public const string CheckType_CheckAndEmpty = "✓  ☐";
+		public const string CheckType_CheckAndX = "✓  X";
+		public const string CheckType_XAndEmpty = "X  ☐";
+		public const string CheckType_StrikeThrough = "Strike-through";
 
 		[BackgroundColor(200, 188, 172)]
 		[DefaultValue(true)]
