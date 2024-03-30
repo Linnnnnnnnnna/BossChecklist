@@ -120,7 +120,9 @@ namespace BossChecklist
 
 		internal bool MarkedAsDowned => WorldAssist.MarkedEntries.Contains(this.Key);
 
-		internal bool IsDownedOrMarked => downed() || MarkedAsDowned;
+		internal bool IsAutoDownedOrMarked => (BossChecklist.BossLogConfig.AutomaticChecklist && downed()) || MarkedAsDowned;
+
+		internal bool IsUpNext => BossLogUI.FindNextEntry() == GetIndex;
 
 		internal int GetIndex => BossChecklist.bossTracker.SortedEntries.IndexOf(this);
 
@@ -175,7 +177,7 @@ namespace BossChecklist
 		/// <returns>If the entry should be visible</returns>
 		internal bool VisibleOnChecklist() {
 			bool HideUnsupported = modSource == "Unknown" && BossChecklist.BossLogConfig.HideUnsupported; // entries not using the new mod calls for the Boss Log
-			bool HideUnavailable = !available() && !IsDownedOrMarked && (BossChecklist.BossLogConfig.HideUnavailable || !BossUISystem.Instance.BossLog.showHidden); // entries that are labeled as not available
+			bool HideUnavailable = !available() && !IsAutoDownedOrMarked && (BossChecklist.BossLogConfig.HideUnavailable || !BossUISystem.Instance.BossLog.showHidden); // entries that are labeled as not available
 			bool HideHidden = hidden && !BossUISystem.Instance.BossLog.showHidden; // entries that are labeled as hidden
 			bool SkipNonBosses = BossChecklist.BossLogConfig.OnlyShowBossContent && type != EntryType.Boss; // if the user has the config to only show bosses and the entry is not a boss
 			if (HideUnavailable || HideHidden || SkipNonBosses || HideUnsupported)
@@ -186,13 +188,20 @@ namespace BossChecklist
 			string mbFilter = BossChecklist.BossLogConfig.FilterMiniBosses;
 			string eFilter = BossChecklist.BossLogConfig.FilterEvents;
 
-			bool FilterBoss = type == EntryType.Boss && bFilter == BossLogConfiguration.Option_HideWhenCompleted && IsDownedOrMarked;
-			bool FilterMiniBoss = type == EntryType.MiniBoss && (mbFilter == BossLogConfiguration.Option_Hide || (mbFilter == BossLogConfiguration.Option_HideWhenCompleted && IsDownedOrMarked));
-			bool FilterEvent = type == EntryType.Event && (eFilter == BossLogConfiguration.Option_Hide || (eFilter == BossLogConfiguration.Option_HideWhenCompleted && IsDownedOrMarked));
+			bool FilterBoss = type == EntryType.Boss && bFilter == BossLogConfiguration.Option_HideWhenCompleted && IsAutoDownedOrMarked;
+			bool FilterMiniBoss = type == EntryType.MiniBoss && (mbFilter == BossLogConfiguration.Option_Hide || (mbFilter == BossLogConfiguration.Option_HideWhenCompleted && IsAutoDownedOrMarked));
+			bool FilterEvent = type == EntryType.Event && (eFilter == BossLogConfiguration.Option_Hide || (eFilter == BossLogConfiguration.Option_HideWhenCompleted && IsAutoDownedOrMarked));
 			if (FilterBoss || FilterMiniBoss || FilterEvent)
 				return false;
 
 			return true; // if it passes all the checks, it should be shown
+		}
+
+		internal bool VisibleOnPageContent() {
+			if (BossChecklist.BossLogConfig.ProgressiveChecklist && !IsAutoDownedOrMarked && !IsUpNext)
+				return false;
+
+			return VisibleOnChecklist();
 		}
 
 		internal EntryInfo(EntryType entryType, string modSource, string internalName, float progression, Func<bool> downed, List<int> npcIDs, Dictionary<string, object> extraData = null) {

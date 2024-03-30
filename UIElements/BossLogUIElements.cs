@@ -49,6 +49,16 @@ namespace BossChecklist.UIElements
 			internal BossLogUI LogUI => BossUISystem.Instance.BossLog;
 			public string hoverText;
 			internal Color hoverTextColor = Color.White;
+			internal Texture2D asset = null;
+			internal Color assetColor = Color.White;
+
+			public LogUIElement() { }
+
+			public LogUIElement(Texture2D asset) {
+				this.asset = asset;
+				this.Width.Pixels = asset.Width;
+				this.Height.Pixels = asset.Height;
+			}
 
 			public override void Update(GameTime gameTime) {
 				if (ContainsPoint(Main.MouseScreen) && !PlayerInput.IgnoreMouseInterface)
@@ -60,6 +70,9 @@ namespace BossChecklist.UIElements
 			public override void Draw(SpriteBatch spriteBatch) {
 				if (ContainsPoint(Main.MouseScreen) && !PlayerInput.IgnoreMouseInterface)
 					HideMouseOverInteractions();
+
+				if (asset is not null)
+					spriteBatch.Draw(asset, GetInnerDimensions().ToRectangle(), assetColor);
 
 				base.Draw(spriteBatch);
 
@@ -259,7 +272,7 @@ namespace BossChecklist.UIElements
 			private readonly Asset<Texture2D> back = BossLogUI.RequestResource("Indicator_Back");
 
 			public IndicatorPanel(int iconCount) {
-				Width.Pixels = (end.Value.Width * 2) + (back.Value.Width * iconCount);
+				Width.Pixels = (end.Value.Width * 2) + ((back.Value.Width + 2) * iconCount - 2);
 				Height.Pixels = end.Value.Height;
 			}
 
@@ -271,8 +284,8 @@ namespace BossChecklist.UIElements
 					return;
 
 				Rectangle inner = GetInnerDimensions().ToRectangle();
-				Rectangle centerPanel = new Rectangle(inner.X + end.Value.Width, inner.Y, inner.Width - (end.Value.Width * 2), inner.Height);
 				Rectangle endPanel = new Rectangle(inner.Right - end.Value.Width, inner.Y, end.Value.Width, end.Value.Height);
+				Rectangle centerPanel = new Rectangle(inner.X + end.Value.Width, inner.Y, inner.Width - (end.Value.Width * 2), inner.Height);
 
 				spriteBatch.Draw(end.Value, inner.TopLeft(), Color.White);
 				spriteBatch.Draw(section.Value, centerPanel, Color.White);
@@ -280,7 +293,7 @@ namespace BossChecklist.UIElements
 
 				if (Id == "Configurations") {
 					for (int i = 0; i < Children.Count(); i++) {
-						spriteBatch.Draw(back.Value, new Vector2(inner.X + 8 + (22 * i), inner.Y + 6), Color.White);
+						spriteBatch.Draw(back.Value, new Vector2(centerPanel.X + (back.Value.Width + 2) * i, inner.Y + 6), Color.White);
 					}
 				}
 				
@@ -303,14 +316,17 @@ namespace BossChecklist.UIElements
 				base.LeftClick(evt);
 
 				if (Id == "Progression") {
-					LogUI.CloseAndConfigure();
+					BossChecklist.BossLogConfig.ProgressiveChecklist = !BossChecklist.BossLogConfig.ProgressiveChecklist;
+				}
+				else if (Id == "Manual") {
+					BossChecklist.BossLogConfig.AutomaticChecklist = !BossChecklist.BossLogConfig.AutomaticChecklist;
 				}
 				else if (Id == "OnlyBosses") {
 					BossChecklist.BossLogConfig.OnlyShowBossContent = !BossChecklist.BossLogConfig.OnlyShowBossContent;
-					BossLogUI.PendingConfigChange = true;
-					BossChecklist.BossLogConfig.UpdateIndicators();
-					LogUI.RefreshPageContent();
 				}
+				BossLogUI.PendingConfigChange = true;
+				BossChecklist.BossLogConfig.UpdateIndicators();
+				LogUI.RefreshPageContent();
 			}
 
 			public override void Draw(SpriteBatch spriteBatch) {
@@ -408,6 +424,7 @@ namespace BossChecklist.UIElements
 		internal class SubPageButton : UIImage {
 			readonly string buttonText;
 			readonly SubPage subPageType;
+			public bool isLocked = false;
 
 			public SubPageButton(Asset<Texture2D> texture, SubPage type) : base(texture) {
 				buttonText = Language.GetTextValue($"{BossLogUI.LangLog}.Tabs.{type}");
@@ -430,6 +447,12 @@ namespace BossChecklist.UIElements
 				Vector2 pos = new Vector2(inner.X + (int)((Width.Pixels - stringAdjust.X * scale) / 2), inner.Y + 5);
 
 				spriteBatch.DrawString(FontAssets.MouseText.Value, translated, pos, Color.Gold, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+
+				if (isLocked) {
+					Texture2D locked = BossLogUI.RequestVanillaTexture("Images/UI/Workshop/PublicityPrivate").Value;
+					pos = new Vector2(inner.X + (inner.Width / 2 - locked.Width / 2), inner.Y + inner.Height / 2 - locked.Height / 2);
+					spriteBatch.Draw(locked, pos, Color.White);
+				}
 			}
 		}
 
@@ -533,9 +556,7 @@ namespace BossChecklist.UIElements
 				}
 
 				/// Everything below is being set up for loot related itemslots ///
-				EntryInfo entry = LogUI.GetLogEntryInfo;
-				bool hardModeMasked = BossChecklist.BossLogConfig.MaskHardMode && !Main.hardMode && entry.progression > BossTracker.WallOfFlesh;
-				bool progressRestricted = !entry.IsDownedOrMarked && (BossChecklist.BossLogConfig.MaskBossLoot || hardModeMasked);
+				EntryInfo entry = LogUI.GetLogEntryInfo;\
 				bool expertRestricted = item.expert && !Main.expertMode;
 				bool masterRestricted = item.master && !Main.masterMode;
 				bool OWmusicRestricted = BossChecklist.bossTracker.otherWorldMusicBoxTypes.Contains(item.type) && !BossLogUI.OtherworldUnlocked;
@@ -547,11 +568,7 @@ namespace BossChecklist.UIElements
 				// Any other case should leave the itemslot color as is
 				var backup = TextureAssets.InventoryBack7;
 				Color oldColor = item.color;
-				if (progressRestricted || (!entry.available() && !entry.IsDownedOrMarked)) {
-					TextureAssets.InventoryBack7 = TextureAssets.InventoryBack11;
-					item.color = Color.Black; // item should be masked in a black silhouette
-				}
-				else if (hasItem) {
+				if (hasItem) {
 					TextureAssets.InventoryBack7 = TextureAssets.InventoryBack3;
 				}
 				else if (expertRestricted || masterRestricted || OWmusicRestricted) {
@@ -573,13 +590,7 @@ namespace BossChecklist.UIElements
 				// If the item has not been obtained, check for item restrictions and apply those icons and texts
 				// If no item restrictions exist, display normal item tooltips, and draw a checkmark for obtained items
 				Vector2 pos = new Vector2(inner.X + inner.Width / 2, inner.Y + inner.Height / 2);
-				if (progressRestricted || (!entry.available() && !entry.IsDownedOrMarked)) {
-					if (IsMouseHovering) {
-						BossUISystem.Instance.UIHoverText = $"{BossLogUI.LangLog}.LootAndCollection.MaskedItems";
-						BossUISystem.Instance.UIHoverTextColor = Color.IndianRed;
-					}
-				}
-				else if (!hasItem) {
+				if (!hasItem) {
 					if (expertRestricted) {
 						spriteBatch.Draw(BossLogUI.RequestVanillaTexture("Images/UI/WorldCreation/IconDifficultyExpert").Value, pos, Color.White);
 						if (IsMouseHovering) {
@@ -755,15 +766,15 @@ namespace BossChecklist.UIElements
 							isDefeated = $"''{Language.GetTextValue($"{BossLogUI.LangLog}.EntryPage.Defeated", Main.worldName)}''";
 						}
 
-						Asset<Texture2D> texture = entry.IsDownedOrMarked ? BossLogUI.Texture_Check_Check : BossLogUI.Texture_Check_X;
+						Asset<Texture2D> texture = entry.IsAutoDownedOrMarked ? BossLogUI.Texture_Check_Check : BossLogUI.Texture_Check_X;
 						Vector2 defeatpos = new Vector2(firstHeadPos.X + (firstHeadPos.Width / 2), firstHeadPos.Y + firstHeadPos.Height - (texture.Height() / 2));
 						spriteBatch.Draw(texture.Value, defeatpos, Color.White);
 
 						// Hovering over the head icon will display the defeated text
 						Rectangle hoverRect = new Rectangle(lastX, firstHeadPos.Y, totalWidth, firstHeadPos.Height);
 						if (Main.MouseScreen.Between(hoverRect.TopLeft(), hoverRect.BottomRight())) {
-							BossUISystem.Instance.UIHoverText = entry.IsDownedOrMarked ? isDefeated : notDefeated;
-							BossUISystem.Instance.UIHoverTextColor = entry.IsDownedOrMarked ? Colors.RarityGreen : Colors.RarityRed;
+							BossUISystem.Instance.UIHoverText = entry.IsAutoDownedOrMarked ? isDefeated : notDefeated;
+							BossUISystem.Instance.UIHoverTextColor = entry.IsAutoDownedOrMarked ? Colors.RarityGreen : Colors.RarityRed;
 						}
 
 						Vector2 pos = new Vector2(pageRect.X + 5, pageRect.Y + 5);
@@ -1146,7 +1157,8 @@ namespace BossChecklist.UIElements
 					}
 					else if (Id != "Credits" && value.HasValue && value.Value != -1) {
 						EntryInfo entry = BossChecklist.bossTracker.SortedEntries[value.Value];
-						this.hoverText = Language.GetTextValue($"{BossLogUI.LangLog}.Tabs.NextEntry", Language.GetTextValue($"{BossLogUI.LangLog}.Common.{entry.type}"), entry.DisplayName);
+						string type = Language.GetTextValue($"{BossLogUI.LangLog}.Common.{(BossChecklist.BossLogConfig.ProgressiveChecklist ? "Entry" : entry.type)}");
+						this.hoverText = Language.GetTextValue($"{BossLogUI.LangLog}.Tabs.NextEntry", type, entry.DisplayName);
 					}
 				}
 			}
@@ -1164,7 +1176,7 @@ namespace BossChecklist.UIElements
 				if (page == BossLogUI.Page_Prompt)
 					return false; // Tabs never show up on the Progression Mode prompt
 
-				if (BossChecklist.BossLogConfig.OnlyShowBossContent && (Id == "MiniBoss" || Id == "Event"))
+				if ((BossChecklist.BossLogConfig.ProgressiveChecklist || BossChecklist.BossLogConfig.OnlyShowBossContent) && (Id == "MiniBoss" || Id == "Event"))
 					return false; // Mini-boss and Event tabs won't show when OnlyShowBossContent is enable
 
 				return Id switch {
@@ -1190,11 +1202,11 @@ namespace BossChecklist.UIElements
 			}
 
 			public override void Draw(SpriteBatch spriteBatch) {
-				// Tab drawing
-				base.Draw(spriteBatch);
-				Rectangle inner = GetInnerDimensions().ToRectangle();
-
 				if (this.Visibile()) {
+					// Tab drawing
+					base.Draw(spriteBatch);
+					Rectangle inner = GetInnerDimensions().ToRectangle();
+
 					spriteBatch.Draw(texture.Value, inner, texture.Value.Bounds, Color.Tan, 0f, Vector2.Zero, OnLeftSide() ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0f);
 
 					int offsetX = inner.X < Main.screenWidth / 2 ? 2 : -2;
@@ -1219,13 +1231,18 @@ namespace BossChecklist.UIElements
 			public TableOfContents(int index, string displayName, Color entryColor, bool loot, bool collect, float textScale = 1, bool large = false) : base(displayName, textScale, large) {
 				this.entry = BossChecklist.bossTracker.SortedEntries[index];
 				this.displayName = displayName;
-				this.markAsNext = BossLogUI.FindNextEntry() == index && BossChecklist.BossLogConfig.DrawNextMark && !entry.hidden;
+				this.markAsNext = BossChecklist.BossLogConfig.DrawNextMark && entry.IsUpNext && !entry.hidden;
 				this.allLoot = loot;
 				this.allCollectibles = collect;
 				TextColor = this.defaultColor = markAsNext && BossChecklist.BossLogConfig.ColoredBossText ? new Color(248, 235, 91) : entryColor;
 			}
 
-			public override void LeftClick(UIMouseEvent evt) => GetParentLog.PendingPageNum = entry.GetIndex; // jump to entry page
+			public override void LeftClick(UIMouseEvent evt) {
+				if (BossChecklist.BossLogConfig.ProgressiveChecklist && !entry.IsAutoDownedOrMarked && !entry.IsUpNext)
+					return;
+
+				GetParentLog.PendingPageNum = entry.GetIndex; // jump to entry page
+			}
 
 			public override void RightClick(UIMouseEvent evt) {
 				// Right-click an entry to mark it as completed
@@ -1314,7 +1331,7 @@ namespace BossChecklist.UIElements
 				Asset<Texture2D> checkGrid = BossLogUI.Texture_Check_Box;
 				string checkType = BossChecklist.BossLogConfig.SelectedCheckmarkType;
 
-				if (entry.MarkedAsDowned || (!BossChecklist.BossLogConfig.ManualChecklist && entry.downed())) {
+				if (entry.IsAutoDownedOrMarked) {
 					if (checkType == BossLogConfiguration.CheckType_XAndEmpty) {
 						checkGrid = BossLogUI.Texture_Check_X;
 					}
@@ -1432,7 +1449,7 @@ namespace BossChecklist.UIElements
 						continue; // skip entry if it is not visible on the checklist or if it is not on the selected hardmode status
 
 					total++;
-					if (entry.IsDownedOrMarked)
+					if (entry.IsAutoDownedOrMarked)
 						downed++;
 				}
 

@@ -74,32 +74,18 @@ namespace BossChecklist
 		[Header("BossLogChecklist")]
 
 		[BackgroundColor(255, 99, 71)]
-		[LabelKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ManualChecklist.Label")]
-		[TooltipKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ManualChecklist.Tooltip")]
-		public bool ManualChecklist {
-			get => manual;
-			set {
-				manual = value;
-				if (value is true)
-					progressive = false;
-			}
-		}
+		[DefaultValue(true)]
+		public bool AutomaticChecklist { get; set; }
 
 		[BackgroundColor(255, 99, 71)]
-		[LabelKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ProgressiveChecklist.Label")]
-		[TooltipKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ProgressiveChecklist.Tooltip")]
 		[DefaultValue(true)]
-		public bool ProgressiveChecklist {
-			get => progressive;
-			set {
-				progressive = value;
-				if (value is true)
-					manual = false;
-			}
-		}
+		public bool ProgressiveChecklist { get; set; }
 
-		private bool progressive = true;
-		private bool manual = false;
+		[BackgroundColor(255, 99, 71)]
+		[DefaultValue(false)]
+		[LabelKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ProgressionPrompt.Label")]
+		[TooltipKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ProgressionPrompt.Tooltip")]
+		public bool PromptDisabled { get; set; }
 
 		[BackgroundColor(250, 235, 215)]
 		[DefaultValue(true)]
@@ -176,6 +162,7 @@ namespace BossChecklist
 		[TooltipKey("$Mods.BossChecklist.Configs.BossLogConfiguration.CheckDroppedLoot.Tooltip")]
 		public bool OnlyCheckDroppedLoot { get; set; }
 
+		/*
 		[Header("BlindMode")]
 
 		[BackgroundColor(255, 99, 71)]
@@ -209,12 +196,6 @@ namespace BossChecklist
 			}
 		}
 
-		[BackgroundColor(255, 99, 71)]
-		[DefaultValue(false)]
-		[LabelKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ProgressionPrompt.Label")]
-		[TooltipKey("$Mods.BossChecklist.Configs.BossLogConfiguration.ProgressionPrompt.Tooltip")]
-		public bool PromptDisabled { get; set; }
-
 		[BackgroundColor(178, 34, 34)]
 		[DefaultValue(false)]
 		public bool MaskTextures { get; set; }
@@ -236,28 +217,29 @@ namespace BossChecklist
 		[BackgroundColor(178, 34, 34)]
 		[DefaultValue(false)]
 		public bool MaskHardMode { get; set; }
+		*/
 
 		public void UpdateIndicators() {
 			BossLogUI Log = BossUISystem.Instance.BossLog;
 			string LangIndicator = "Mods.BossChecklist.Log.Indicator";
 			string LangCommon = "Mods.BossChecklist.Log.Common";
 
-			Log.Indicators[0].Color = OnlyShowBossContent ? Color.LightGreen : Color.DarkGray;
+			Log.Indicators[0].Color = OnlyShowBossContent ? Color.White : Color.DarkGray;
 			Log.Indicators[0].hoverText = OnlyShowBossContent ? $"{LangIndicator}.OnlyBossContentEnabled" : $"{LangIndicator}.OnlyBossContentDisabled";
 
-			if (ProgressionModeEnable) {
-				Log.Indicators[1].Color = Color.Tomato;
-				Log.Indicators[1].hoverText = Language.GetTextValue($"{LangIndicator}.ProgressionMode", Language.GetTextValue($"{LangCommon}.Enabled"));
-			}
-			else if (MaskTextures || MaskNames || MaskBossLoot || MaskHardMode) {
-				Log.Indicators[1].Color = Color.Salmon;
-				Log.Indicators[1].hoverText = Language.GetTextValue($"{LangIndicator}.ProgressionMode", Language.GetTextValue($"{LangCommon}.PartiallyEnabled"));
-			}
-			else {
-				Log.Indicators[1].Color = Color.DarkGray;
-				Log.Indicators[1].hoverText = Language.GetTextValue($"{LangIndicator}.ProgressionMode", Language.GetTextValue($"{LangCommon}.Disabled"));
-			}
-			BossChecklist.instance.Logger.Info(Log.Indicators[1].hoverText);
+			Log.Indicators[1].Color = AutomaticChecklist ? Color.LightGreen : Color.DarkGray;
+			Log.Indicators[1].hoverText = AutomaticChecklist ? $"{LangIndicator}.AutomaticChecklist" : $"{LangIndicator}.ManualChecklist";
+
+			Log.Indicators[2].Color = ProgressiveChecklist ? Color.Tomato : Color.DarkGray;
+			Log.Indicators[2].hoverText = Language.GetTextValue($"{LangIndicator}.ProgressionMode", Language.GetTextValue($"{LangCommon}." + (ProgressiveChecklist ? "Enabled" : "Disabled"))); // PartiallyEnabled no longer available
+
+			BossChecklist.instance.Logger.Info(Log.Indicators[2].hoverText);
+
+			string type = Language.GetTextValue($"{BossLogUI.LangLog}.Common.{(BossChecklist.BossLogConfig.ProgressiveChecklist ? "Entry" : "Boss")}");
+			Log.BossTab.hoverText = Language.GetTextValue($"{BossLogUI.LangLog}.Tabs.NextEntry", type, BossChecklist.bossTracker.SortedEntries[BossLogUI.FindNextEntry(EntryType.Boss)].DisplayName);
+
+			if (Log.PageNum == BossLogUI.Page_TableOfContents)
+				Log.RefreshPageContent();
 		}
 
 		public override void OnChanged() {

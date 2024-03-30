@@ -3,6 +3,7 @@ Mods: {
 		Log: {
 			Common: {
 				// BossLog: Boss Log
+				// Entry: Entry
 				// Boss: Boss
 				// BossPlural: Bosses
 				// MiniBoss: Mini-boss
@@ -30,6 +31,8 @@ Mods: {
 
 			Indicator: {
 				// ProgressionMode: Progression mode is {0}
+				// ManualChecklist: Entries must be manually checked off by the user
+				// AutomaticChecklist: The checklist will automatically check off entries
 				// OnlyBossContentEnabled: Only boss content is available to be displayed
 				// OnlyBossContentDisabled: All content is available to be displayed
 			}
@@ -136,27 +139,30 @@ Mods: {
 
 			ProgressionMode: {
 				// BeforeYouBegin: Before you begin...
-				// AskEnable: Do you want to enable Progression Mode?
+				// AskEnable: Do you want to enable the Progression Checklist?
 				// SelectAnOption: Please select an option below...
-				// SelectDisable: Continue with progression mode disabled...
-				// SelectEnable: Continue with progression mode fully enabled...
-				// SelectConfig: Close Boss Log and configure progression mode...
-				/* DisablePrompt:
+				/* SelectDisable:
 					'''
-					Don't show this again
-					(For newly-created characters)
+					Continue with the progressive checklist disabled...
+					* All page info content is unlocked from the start
+					* Nothing hidden. No limits.
 					''' */
-				/* Description:
+				/* SelectEnable:
 					'''
-					Progression mode hides a lot of boss content until youve beaten said boss or some other requirement. This mode is great for blind play-throughs.
-
-					Note, the Boss Log is disabled until one of the options is selected!
+					Continue with the progressive checklist fully enabled...
+					* Page info content is locked for undefeated entries
+					* Portraits and names are masked
+					* Boss loot locked until entry defeation
+					* Next check enabled, reducing info limitations (recommended)
 					''' */
+				// SelectConfig: Close Boss Log and configure the progressive checklist...
+				// DisablePrompt: Don't show this prompt again
+				// Description: The Progressive Checklist will limit and hide entry content until the entry is defeated or marked as completed. If you are looking to do a blind play-through then you might want to consider enabling this feature. The Boss Log is disabled until you make a selection or reopen it with the prompt configuration disabled
 				/* IsEnabled:
 					'''
-					[i:888] Progression Mode is fully or partially enabled!
+					[i:888] The Progressive Checklist is fully or partially enabled!
 					This will mask some information about bosses until they have been defeated.
-					To disable or configure progression mode go to:
+					To disable or configure the progressive checklist go to:
 					Settings > Mod Configurations > Boss Checklist: Boss Log Customization
 					and scroll down to the Progress Mode configs
 					''' */
@@ -361,22 +367,23 @@ Mods: {
 					// Tooltip: ""
 				}
 
-				ManualChecklist: {
-					// Label: Manual Checklist
+				AutomaticChecklist: {
+					// Label: Automatic Checklist
 					/* Tooltip:
 						'''
-						Disables entries being marked automatically. Manually mark entries using right-click on their name.
-						Enabling will disable Progressive Checklist. Disabling will allow automatic entry marking.
+						Entries will be marked automatically when defeated. Disabling requires the user to manually check off entries.
+						Whether enabled or disabled, you can manually mark entries using right-click on their name.
 						''' */
 				}
 
 				ProgressiveChecklist: {
 					// Label: Progressive Checklist
-					/* Tooltip:
-						'''
-						Hides content until the entry is encountered or beaten.
-						Enabling will disable Manual Checklist. Requires automatic entry marking.
-						''' */
+					// Tooltip: Hides content until the entry is encountered or beaten.
+				}
+
+				ProgressionPrompt: {
+					// Label: Disable Progressive Checklist prompt
+					// Tooltip: While enabled, this will prevent the prompt from appearing for newly-created characters.
 				}
 
 				HideUnavailable: {
@@ -454,11 +461,6 @@ Mods: {
 				DisableProgressionMode: {
 					// Label: Disable Progression Mode
 					// Tooltip: ""
-				}
-
-				ProgressionPrompt: {
-					// Label: Disable Progression Mode prompt
-					// Tooltip: While enabled, this will prevent the prompt from appearing for newly-created characters.
 				}
 
 				MaskTextures: {

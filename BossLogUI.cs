@@ -161,6 +161,7 @@ namespace BossChecklist
 		public static Asset<Texture2D> Texture_Credit_Register;
 
 		public static Asset<Texture2D> Texture_Content_RecordSlot;
+		public static Asset<Texture2D> Texture_Content_PromptSlot;
 		public static Asset<Texture2D> Texture_Content_Cycle;
 		public static Asset<Texture2D> Texture_Content_ToggleHidden;
 		public static Asset<Texture2D> Texture_Content_BossKey;
@@ -238,7 +239,6 @@ namespace BossChecklist
 			if (show) {
 				// Mark the player as having opened the Log if they have not been so already
 				if (!GetModPlayer.hasOpenedTheBossLog) {
-					GetModPlayer.hasOpenedTheBossLog = true; // This will only ever happen once per character
 					GetModPlayer.enteredWorldReset = false; // If opening for the first time, this doesn't need to occur again until the next world reset
 
 					// When opening for the first time, open the Progression Mode prompt if enabled. Otherwise, open the Table of Contents.
@@ -311,6 +311,7 @@ namespace BossChecklist
 			Texture_Credit_Register = RequestResource("Credits_Panel_Register");
 
 			Texture_Content_RecordSlot = RequestResource("Extra_RecordSlot");
+			Texture_Content_PromptSlot = RequestResource("Extra_PromptSlot");
 			Texture_Content_Cycle = RequestResource("Extra_CycleRecipe");
 			Texture_Content_ToggleHidden = RequestResource("Nav_Hidden");
 			Texture_Content_BossKey = RequestResource("Extra_Key");
@@ -405,16 +406,17 @@ namespace BossChecklist
 
 			Indicators = new List<IndicatorIcon>() {
 				new IndicatorIcon(RequestResource("Indicator_OnlyBosses")) { Id = "OnlyBosses" },
+				new IndicatorIcon(RequestResource("Indicator_Manual")) { Id = "Manual" },
 				new IndicatorIcon(RequestResource("Indicator_Progression")) { Id = "Progression" },
 			};
 			IndicatorTab = new IndicatorPanel(Indicators.Count) { Id = "Configurations" };
 
-			int offsetX = 0;
+			int offsetX = 2;
 			foreach (IndicatorIcon icon in Indicators) {
 				icon.Left.Pixels = 10 + offsetX;
 				icon.Top.Pixels = 8;
 				IndicatorTab.Append(icon);
-				offsetX += 22;
+				offsetX += 20;
 			}
 
 			InteractionIcon = new IndicatorIcon(RequestResource("Indicator_Interaction"));
@@ -503,10 +505,12 @@ namespace BossChecklist
 
 			if (headNum != -1) {
 				EntryInfo entry = BossChecklist.bossTracker.SortedEntries[headNum];
+				bool isNotProgressed = BossChecklist.BossLogConfig.ProgressiveChecklist && !entry.IsAutoDownedOrMarked && !entry.IsUpNext;
 				int headOffset = 0;
 				foreach (Asset<Texture2D> headIcon in entry.headIconTextures()) {
-					spriteBatch.Draw(headIcon.Value, new Vector2(Main.mouseX + 15 + headOffset, Main.mouseY + 15), MaskBoss(entry));
-					headOffset += headIcon.Value.Width + 2;
+					Texture2D headShown = isNotProgressed ? TextureAssets.NpcHead[0].Value : headIcon.Value;
+					spriteBatch.Draw(headShown, new Vector2(Main.mouseX + 15 + headOffset, Main.mouseY + 15), entry.IsUpNext ? Color.Black : Color.White);
+					headOffset += headShown.Width + 2;
 				}
 			}
 		}
@@ -747,72 +751,63 @@ namespace BossChecklist
 			PageOne.Append(textBox);
 
 			// create buttons for the different progression mode options
-			UIImage[] backdrops = new UIImage[] {
-				new UIImage(Texture_Content_RecordSlot),
-				new UIImage(Texture_Content_RecordSlot),
-				new UIImage(Texture_Content_RecordSlot),
-				new UIImage(Texture_Content_RecordSlot)
+			LogUIElement[] backdrops = new LogUIElement[] {
+				new LogUIElement(Texture_Content_PromptSlot.Value),
+				new LogUIElement(Texture_Content_PromptSlot.Value),
+				new LogUIElement(Texture_Content_RecordSlot.Value)
 			};
 
-			backdrops[0].OnLeftClick += (a, b) => SelectProgressionModeState(false);
-			backdrops[1].OnLeftClick += (a, b) => SelectProgressionModeState(true);
-			backdrops[2].OnLeftClick += (a, b) => CloseAndConfigure();
-			backdrops[3].OnLeftClick += (a, b) => DisablePromptMessage();
-			foreach (UIImage backdrop in backdrops) {
-				backdrop.OnMouseOver += (a, b) => { backdrop.Color = BossChecklist.BossLogConfig.BossLogColor; };
-				backdrop.OnMouseOut += (a, b) => { backdrop.Color = Color.White; };
+			backdrops[0].OnLeftClick += (a, b) => SelectProgressionModeState(true);
+			backdrops[1].OnLeftClick += (a, b) => SelectProgressionModeState(false);
+			backdrops[2].OnLeftClick += (a, b) => DisablePromptMessage();
+			foreach (LogUIElement backdrop in backdrops) {
+				backdrop.OnMouseOver += (a, b) => { backdrop.assetColor = BossChecklist.BossLogConfig.BossLogColor;};
+				backdrop.OnMouseOut += (a, b) => { backdrop.assetColor = Color.White; };
 			}
 
+			backdrops[0].Left.Pixels = PageTwo.Width.Pixels / 2 - Texture_Content_PromptSlot.Value.Width - 10;
+			backdrops[1].Left.Pixels = PageTwo.Width.Pixels / 2 + 10;
+			backdrops[2].Left.Pixels = 25;
+
+			backdrops[0].Top.Pixels = 125;
+			backdrops[1].Top.Pixels = 125;
+			backdrops[2].Top.Pixels = 125 + Texture_Content_PromptSlot.Value.Height + 25;
+
+			backdrops[0].hoverText = $"{LangLog}.ProgressionMode.SelectEnable";
+			backdrops[1].hoverText = $"{LangLog}.ProgressionMode.SelectDisable";
+
 			UIImage[] buttons = new UIImage[] {
-				new UIImage(RequestVanillaTexture($"Images/Item_{ItemID.ReflectiveShades}")),
-				new UIImage(RequestVanillaTexture($"Images/Item_{ItemID.Blindfold}")),
-				new UIImage(RequestVanillaTexture($"Images/UI/Camera_1")),
+				new UIImage(RequestResource($"Extra_ProgressiveOn")),
+				new UIImage(RequestResource($"Extra_ProgressiveOff")),
 				new UIImage(Texture_Check_Box)
 			};
 
-			FittedTextPanel[] textOptions = new FittedTextPanel[] {
-				new FittedTextPanel($"{LangLog}.ProgressionMode.SelectDisable"),
-				new FittedTextPanel($"{LangLog}.ProgressionMode.SelectEnable"),
-				new FittedTextPanel($"{LangLog}.ProgressionMode.SelectConfig"),
-				new FittedTextPanel($"{LangLog}.ProgressionMode.DisablePrompt"),
-			};
+			buttons[0].Left.Pixels = backdrops[0].Width.Pixels / 2 - RequestResource($"Extra_ProgressiveOn").Value.Width / 2;
+			buttons[1].Left.Pixels = backdrops[1].Height.Pixels / 2 - RequestResource($"Extra_ProgressiveOff").Value.Width / 2;
+			buttons[2].Left.Pixels = 15;
+
+			buttons[0].Top.Pixels = backdrops[0].Height.Pixels / 2 - buttons[0].Height.Pixels / 2;
+			buttons[1].Top.Pixels = backdrops[1].Height.Pixels / 2 - buttons[1].Height.Pixels / 2;
+			buttons[2].Top.Pixels = backdrops[2].Height.Pixels / 2 - buttons[2].Height.Pixels / 2;
+
+			FittedTextPanel textOptions = new FittedTextPanel($"{LangLog}.ProgressionMode.DisablePrompt");
+			textOptions.Width.Pixels = backdrops[2].Width.Pixels - (buttons[2].Left.Pixels + buttons[2].Width.Pixels + 15);
+			textOptions.Height.Pixels = backdrops[2].Height.Pixels / 2;
+			textOptions.Left.Pixels = buttons[2].Left.Pixels + buttons[2].Width.Pixels;
+			textOptions.Top.Pixels = 5;
+			textOptions.PaddingTop = 0;
+			textOptions.PaddingLeft = 15;
+			backdrops[2].Append(textOptions);
 
 			PromptCheck = new UIImage(BossChecklist.BossLogConfig.PromptDisabled ? Texture_Check_Check : Texture_Check_X);
 
-			for (int i = 0; i < backdrops.Length; i++) {
-				backdrops[i].Left.Pixels = 25;
-				backdrops[i].Top.Pixels = 75 + (75 * i);
-
-				buttons[i].Left.Pixels = 15;
-				buttons[i].Top.Pixels = backdrops[i].Height.Pixels / 2 - buttons[i].Height.Pixels / 2;
-
-				textOptions[i].Width.Pixels = backdrops[i].Width.Pixels - (buttons[i].Left.Pixels + buttons[i].Width.Pixels + 15);
-				textOptions[i].Height.Pixels = backdrops[i].Height.Pixels;
-				textOptions[i].Left.Pixels = buttons[i].Left.Pixels + buttons[i].Width.Pixels;
-				textOptions[i].Top.Pixels = -10;
-				textOptions[i].PaddingTop = 0;
-				textOptions[i].PaddingLeft = 15;
-
+			for (int i = 0; i < buttons.Length; i++) {
 				if (i == backdrops.Length - 1) {
 					buttons[i].Append(PromptCheck);
 				}
 				backdrops[i].Append(buttons[i]);
-				backdrops[i].Append(textOptions[i]);
 				PageTwo.Append(backdrops[i]);
 			}
-		}
-
-		/// <summary>
-		/// Fully enables or disables Progression Mode based on option selected and redirects the player to the Table of Contents.
-		/// </summary>
-		private void SelectProgressionModeState(bool enabled) {
-			BossChecklist.BossLogConfig.ProgressionModeEnable = enabled;
-			BossChecklist.BossLogConfig.ProgressionModeDisable = !enabled;
-			BossChecklist.BossLogConfig.UnmaskNextBoss = !enabled;
-			PendingConfigChange = true; // save the option selected before proceeding
-			BossChecklist.BossLogConfig.UpdateIndicators();
-
-			PageNum = Page_TableOfContents; // switch page to Table of Contents when clicked
 		}
 
 		/// <summary>
@@ -860,6 +855,20 @@ namespace BossChecklist
 		}
 
 		/// <summary>
+		/// Fully enables or disables Progression Mode based on option selected and redirects the player to the Table of Contents.
+		/// </summary>
+		private void SelectProgressionModeState(bool enabled) {
+			BossChecklist.BossLogConfig.ProgressiveChecklist = enabled;
+			if (BossChecklist.BossLogConfig.ProgressiveChecklist)
+				BossChecklist.BossLogConfig.DrawNextMark = true;
+
+			PendingConfigChange = true; // save the option selected before proceeding
+			BossChecklist.BossLogConfig.UpdateIndicators();
+
+			PageNum = Page_TableOfContents; // switch page to Table of Contents when clicked
+		}
+
+		/// <summary>
 		/// Toggles whether the prompt will show on future characters. This can still be changed under the configs.
 		/// </summary>
 		private void DisablePromptMessage() {
@@ -888,26 +897,16 @@ namespace BossChecklist
 			// Figure out next page based on the new page number value
 			// If the page is hidden or unavailable, keep moving till its not or until page reaches the end
 			// Also check for "Only Bosses" navigation
-			if (NewPageValue >= 0) {
-				// if the new boss page is hidden, unavailable, or otherwise invalid...
-				bool HiddenOrUnAvailable = BossList[NewPageValue].hidden || !BossList[NewPageValue].available();
-				bool OnlyDisplayBosses = BossChecklist.BossLogConfig.OnlyShowBossContent && BossList[NewPageValue].type != EntryType.Boss;
-				if (HiddenOrUnAvailable || OnlyDisplayBosses) {
-					// ...repeat the new page calculation until a valid boss page is selected
-					// or until its reached page -1 (table of contents) or -2 (credits)
-					while (NewPageValue >= 0) {
-						EntryInfo currentBoss = BossList[NewPageValue];
-						if (!currentBoss.hidden && currentBoss.available() && (!BossChecklist.BossLogConfig.OnlyShowBossContent || currentBoss.type == EntryType.Boss))
-							break; // if 'only show bosses' is not enabled or if it IS enabled and the entry is a boss
+			while (NewPageValue >= 0) {
+				if (NewPageValue >= 0 && BossList[NewPageValue].VisibleOnPageContent())
+					break;
 
-						// same calulation as before, but repeated until a valid page is selected
-						if (button.Id == "Next") {
-							NewPageValue = NewPageValue < BossList.Count - 1 ? NewPageValue + 1 : Page_Credits;
-						}
-						else {
-							NewPageValue = NewPageValue >= 0 ? NewPageValue - 1 : BossList.Count - 1;
-						}
-					}
+				// same calulation as before, but repeated until a valid page is selected
+				if (button.Id == "Next") {
+					NewPageValue = NewPageValue < BossList.Count - 1 ? NewPageValue + 1 : Page_Credits;
+				}
+				else {
+					NewPageValue = NewPageValue >= 0 ? NewPageValue - 1 : BossList.Count - 1;
 				}
 			}
 
@@ -929,7 +928,15 @@ namespace BossChecklist
 
 			// Only on boss pages does updating the category page matter
 			if (PageNum >= 0) {
-				SelectedSubPage = subPage;
+				if (BossChecklist.BossLogConfig.ProgressiveChecklist && !GetLogEntryInfo.IsAutoDownedOrMarked && subPage == SubPage.LootAndCollectibles) {
+					// If Progressive Checklist is enabled, and the Loot subpage is trying to be accessed, deny it
+					// This can also happen if the loot page is already selected and a navigation button is used to access a locked page
+					if (SelectedSubPage == SubPage.LootAndCollectibles)
+						SelectedSubPage = SubPage.Records;
+				}
+				else {
+					SelectedSubPage = subPage;
+				}
 				if (subCategory != SubCategory.None)
 					RecordSubCategory = subCategory;
 			}
@@ -1029,6 +1036,7 @@ namespace BossChecklist
 					PageTwo.Append(recordButton);
 					PageTwo.Append(spawnButton);
 					PageTwo.Append(lootButton);
+					lootButton.isLocked = !GetLogEntryInfo.IsAutoDownedOrMarked;
 				}
 				else {
 					// Old mod calls are no longer supported and will not add entries
@@ -1056,6 +1064,9 @@ namespace BossChecklist
 		/// the progress bar of defeated entries.
 		/// </summary>
 		private void UpdateTableofContents() {
+			if (GetModPlayer.hasOpenedTheBossLog is false)
+				GetModPlayer.hasOpenedTheBossLog = true; // This will only ever happen once per character
+
 			prehardmodeList.Clear(); // clear both lists before setting up content
 			hardmodeList.Clear();
 
@@ -1079,19 +1090,13 @@ namespace BossChecklist
 
 				// Setup display name. Show "???" if unavailable and Silhouettes are turned on
 				string displayName = entry.DisplayName;
-				BossLogConfiguration cfg = BossChecklist.BossLogConfig;
-
-				bool namesMasked = cfg.MaskNames && !entry.IsDownedOrMarked;
-				bool hardMode = cfg.MaskHardMode && !Main.hardMode && entry.progression > BossTracker.WallOfFlesh && !entry.IsDownedOrMarked;
-				bool availability = cfg.HideUnavailable && !entry.available() && !entry.IsDownedOrMarked;
-				bool maskedButNext = cfg.DrawNextMark && cfg.MaskNames && cfg.UnmaskNextBoss && !entry.IsDownedOrMarked && entry.available() && !entry.hidden && FindNextEntry() == entry.GetIndex;
-				if ((namesMasked || hardMode || availability) && !maskedButNext)
+				if (BossChecklist.BossLogConfig.ProgressiveChecklist && !entry.IsAutoDownedOrMarked && !entry.IsUpNext)
 					displayName = "???";
 
 				// The first entry that isnt downed to have a nextCheck will set off the next check for the rest
 				// Entries that ARE downed will still be green due to the ordering of colors within the draw method
 				// Update marked downs. If the boss is actually downed, remove the mark.
-				if (entry.MarkedAsDowned && !cfg.ManualChecklist) {
+				if (BossChecklist.BossLogConfig.AutomaticChecklist && entry.MarkedAsDowned) {
 					displayName += "*";
 					/*
 					if (WorldAssist.MarkedEntries.Contains(entry.Key) && entry.downed()) {
@@ -1166,11 +1171,11 @@ namespace BossChecklist
 				}
 
 				Color textColor = Color.PapayaWhip; // default color when ColoredBossText is false
-				if ((!entry.available() && !entry.IsDownedOrMarked) || entry.hidden) {
+				if ((!entry.available() && !entry.IsAutoDownedOrMarked) || entry.hidden) {
 					textColor = Color.DimGray; // Hidden or Unavailable entry text color takes priority over all other text color alterations
 				}
 				else if (BossChecklist.BossLogConfig.ColoredBossText) {
-					textColor = entry.IsDownedOrMarked ? Colors.RarityGreen : Colors.RarityRed;
+					textColor = entry.IsAutoDownedOrMarked ? Colors.RarityGreen : Colors.RarityRed;
 				}
 
 				TableOfContents listedEntry = new TableOfContents(entry.GetIndex, displayName, textColor, allLoot, allCollect) {
@@ -1225,7 +1230,7 @@ namespace BossChecklist
 				hardmodeBar.Width.Pixels = prehardmodeBar.Width.Pixels;
 
 				PageOne.Append(prehardmodeBar);
-				if (!BossChecklist.BossLogConfig.MaskHardMode || Main.hardMode)
+				if (!BossChecklist.BossLogConfig.ProgressiveChecklist || Main.hardMode)
 					PageTwo.Append(hardmodeBar);
 			}
 		}
@@ -1337,7 +1342,7 @@ namespace BossChecklist
 					EntryInfo relatedEntry = BossChecklist.bossTracker.FindEntryFromKey(entryKey);
 
 					string hoverText = relatedEntry.DisplayName + "\n" + Language.GetTextValue($"{LangLog}.EntryPage.ViewPage");
-					Color iconColor = relatedEntry.IsDownedOrMarked ? Color.White : MaskBoss(relatedEntry) == Color.Black ? Color.Black : faded;
+					Color iconColor = relatedEntry.IsAutoDownedOrMarked ? Color.White : MaskBoss(relatedEntry) == Color.Black ? Color.Black : faded;
 
 					NavigationalButton entryIcon = new NavigationalButton(relatedEntry.headIconTextures().First(), false, iconColor) {
 						Id = GetLogEntryInfo.type == EntryType.Event ? "eventIcon" : "bossIcon",
@@ -1427,7 +1432,7 @@ namespace BossChecklist
 							EntryInfo relatedEntry = BossChecklist.bossTracker.FindEntryFromKey(entryKey);
 
 							string hoverText = relatedEntry.DisplayName + "\n" + Language.GetTextValue($"{LangLog}.EntryPage.ViewPage");
-							Color iconColor = relatedEntry.IsDownedOrMarked ? Color.White : MaskBoss(relatedEntry) == Color.Black ? Color.Black : faded;
+							Color iconColor = relatedEntry.IsAutoDownedOrMarked ? Color.White : MaskBoss(relatedEntry) == Color.Black ? Color.Black : faded;
 
 							NavigationalButton entryIcon = new NavigationalButton(relatedEntry.headIconTextures().First(), false, iconColor) {
 								Id = GetLogEntryInfo.type == EntryType.Event ? "eventIcon" : "bossIcon",
@@ -1811,22 +1816,14 @@ namespace BossChecklist
 		/// </summary>
 		/// <param name="entryType">Add an entry type to specifically look for the next available entry of that type.</param>
 		/// <returns>The index of the next available entry within the SortedEntries list.</returns>
-		public static int FindNextEntry(EntryType? entryType = null) => BossChecklist.bossTracker.SortedEntries.FindIndex(x => !x.IsDownedOrMarked && x.VisibleOnChecklist() && (!entryType.HasValue || x.type == entryType));
+		public static int FindNextEntry(EntryType? entryType = null) => BossChecklist.bossTracker.SortedEntries.FindIndex(x => !x.IsAutoDownedOrMarked && x.available() && x.VisibleOnChecklist() && (!entryType.HasValue || x.type == entryType));
 
 		/// <summary> Determines if a texture should be masked by a black sihlouette. </summary>
 		public static Color MaskBoss(EntryInfo entry) {
-			if (!entry.IsDownedOrMarked) {
-				if (BossChecklist.BossLogConfig.MaskTextures) {
-					return Color.Black;
-				}
-				else if (!Main.hardMode && entry.progression > BossTracker.WallOfFlesh && BossChecklist.BossLogConfig.MaskHardMode) {
-					return Color.Black;
-				}
-				else if (!entry.available()) {
-					return Color.Black;
-				}
-			}
-			return entry.hidden ? Color.Black : Color.White;
+			if (!BossChecklist.BossLogConfig.ProgressiveChecklist)
+				return Color.White;
+
+			return !entry.IsAutoDownedOrMarked || entry.IsUpNext ? Color.Black : Color.White;
 		}
 
 		public static void OverrideForGroups(Recipe recipe, Item item) {

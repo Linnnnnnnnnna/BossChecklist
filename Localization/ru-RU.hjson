@@ -3,6 +3,7 @@ Mods: {
 		Log: {
 			Common: {
 				BossLog: Босс-журнал
+				// Entry: Entry
 				Boss: Босса
 				BossPlural: Боссы
 				MiniBoss: Мини-босса
@@ -30,6 +31,8 @@ Mods: {
 
 			Indicator: {
 				ProgressionMode: Режим прогрессии {0}
+				// ManualChecklist: Entries must be manually checked off by the user
+				// AutomaticChecklist: The checklist will automatically check off entries
 				OnlyBossContentEnabled: Доступен только контент боссов для отображения
 				OnlyBossContentDisabled: Доступен весь контент для отображения
 			}
@@ -366,22 +369,23 @@ Mods: {
 					Tooltip: ""
 				}
 
-				ManualChecklist: {
-					// Label: Manual Checklist
+				AutomaticChecklist: {
+					// Label: Automatic Checklist
 					/* Tooltip:
 						'''
-						Disables entries being marked automatically. Manually mark entries using right-click on their name.
-						Enabling will disable Progressive Checklist. Disabling will allow automatic entry marking.
+						Entries will be marked automatically when defeated. Disabling requires the user to manually check off entries.
+						Whether enabled or disabled, you can manually mark entries using right-click on their name.
 						''' */
 				}
 
 				ProgressiveChecklist: {
 					// Label: Progressive Checklist
-					/* Tooltip:
-						'''
-						Hides content until the entry is encountered or beaten.
-						Enabling will disable Manual Checklist. Requires automatic entry marking.
-						''' */
+					// Tooltip: Hides content until the entry is encountered or beaten.
+				}
+
+				ProgressionPrompt: {
+					Label: Отключить предупреждение о режиме прогрессии
+					Tooltip: При включении этой настройки предупреждение о режиме прогрессии не будет появляться для новых персонажей.
 				}
 
 				HideUnavailable: {
@@ -459,11 +463,6 @@ Mods: {
 				DisableProgressionMode: {
 					Label: Отключить режим прогрессии
 					Tooltip: ""
-				}
-
-				ProgressionPrompt: {
-					Label: Отключить предупреждение о режиме прогрессии
-					Tooltip: При включении этой настройки предупреждение о режиме прогрессии не будет появляться для новых персонажей.
 				}
 
 				MaskTextures: {
