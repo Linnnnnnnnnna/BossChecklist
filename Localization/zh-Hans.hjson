@@ -3,7 +3,7 @@ Mods: {
 		Log: {
 			Common: {
 				BossLog: Boss日志
-				// Entry: Entry
+				Entry: 条目
 				Boss: Boss
 				BossPlural: Boss
 				MiniBoss: 小boss
@@ -30,9 +30,9 @@ Mods: {
 			}
 
 			Indicator: {
-				ProgressionMode: 进度模式已{0}
-				// ManualChecklist: Entries must be manually checked off by the user
-				// AutomaticChecklist: The checklist will automatically check off entries
+				ProgressionMode: 渐进式日志已{0}
+				ManualChecklist: 条目必须由用户手动检查
+				AutomaticChecklist: 日志将自动检查条目
 				OnlyBossContentEnabled: 只能显示Boss内容
 				OnlyBossContentDisabled: 能显示所有内容
 			}
@@ -139,29 +139,32 @@ Mods: {
 
 			ProgressionMode: {
 				BeforeYouBegin: 在你开始之前...
-				AskEnable: 你想要开启进度模式吗?
+				AskEnable: 你想要开启渐进式日志吗?
 				SelectAnOption: 请在下方选择一项...
-				SelectDisable: 继续并禁用进度模式...
-				SelectEnable: 继续并完全开启进度模式...
-				SelectConfig: 关闭Boss日志并配置进度模式...
-				DisablePrompt:
+				SelectDisable:
 					'''
-					不再显示此内容
-					(对于新创建的人物)
+					继续并禁用渐进式日志...
+					* 解锁所有页面信息内容
+					* 没有隐藏. 没有限制.
 					'''
-				Description:
+				SelectEnable:
 					'''
-					进度模式隐藏了很多Boss内容, 直至你击败对应的Boss或满足条件. 本模式极其适合盲打通关.
-
-					注意, 在选择任意选项之前, Boss日志将被禁用!
+					继续并完全开启渐进式日志...
+					* 锁定未击败条目的页面信息内容
+					* 材质和名称被遮掩
+					* Boss战利品被锁定, 直到被击败
+					* 启用提示下一个要挑战的Boss, 降低信息局限性 (推荐)
 					'''
+				SelectConfig: 关闭Boss日志并配置渐进式日志...
+				DisablePrompt: 不再显示此内容
+				Description: 渐进式日志将限制并隐藏许多Boss内容, 直至条目被击败或标记为已完成. 如果你想进行盲打通关, 可以考虑启用此功能. Boss日志将被禁用, 直至你做出选择或在设置中禁用提示后重新打开.
 				IsEnabled:
 					'''
-					[i:888] 进度模式已完全或部分启用!
+					[i:888] 渐进式日志已完全或部分启用!
 					这会隐藏一些与Boss相关的信息, 直至它们被击败.
-					若想禁用或配置进度模式, 请前往:
+					若想禁用或配置渐进式日志, 请前往:
 					设置 > Mod设置 > Boss清单: 自定义Boss日志
-					并向下滚动至进度模式设置
+					并向下滚动至渐进式日志设置
 					'''
 			}
 
@@ -333,7 +336,7 @@ Mods: {
 				Headers: {
 					BossLogUI: "[i:149] [c/ffeb6e:Boss日志UI]"
 					BossLogChecklist: "[i:903] [c/ffeb6e:Boss日志清单]"
-					BlindMode: "[i:888] [c/ffeb6e:进度模式 - 击败Boss以解锁其条目!]"
+					BlindMode: "[i:888] [c/ffeb6e:渐进式日志 - 击败Boss以解锁其条目!]"
 				}
 
 				BossLogColor: {
@@ -365,21 +368,21 @@ Mods: {
 				}
 
 				AutomaticChecklist: {
-					// Label: Automatic Checklist
-					/* Tooltip:
+					Label: 自动日志
+					Tooltip:
 						'''
-						Entries will be marked automatically when defeated. Disabling requires the user to manually check off entries.
-						Whether enabled or disabled, you can manually mark entries using right-click on their name.
-						''' */
+						击败后会自动标记条目. 禁用需要用户手动检查条目.
+						无论启用或禁用, 你都可以通过右键条目名称来对其进行标记.
+						'''
 				}
 
 				ProgressiveChecklist: {
-					// Label: Progressive Checklist
-					// Tooltip: Hides content until the entry is encountered or beaten.
+					Label: 渐进式日志
+					Tooltip: 隐藏内容, 直至遇见或击败条目.
 				}
 
 				ProgressionPrompt: {
-					Label: 禁用进度模式提示
+					Label: 禁用渐进式日志提示
 					Tooltip: 如果启用, 则阻止用于新创建的人物的提示出现.
 				}
 
@@ -451,12 +454,12 @@ Mods: {
 				}
 
 				EnableProgressionMode: {
-					Label: 启用进度模式
+					Label: 启用渐进式日志
 					Tooltip: ""
 				}
 
 				DisableProgressionMode: {
-					Label: 禁用进度模式
+					Label: 禁用渐进式日志
 					Tooltip: ""
 				}
 
