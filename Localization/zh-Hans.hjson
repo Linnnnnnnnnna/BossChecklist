@@ -50,7 +50,7 @@ Mods: {
 					Show: "{0}: 显示"
 					Hide: "{0}: 隐藏"
 					HideWhenCompleted: "{0}: 隐藏已击败的"
-					ToggleVisibility: 切换隐藏可见性
+					ToggleVisibility: 切换隐藏列表
 					Disabled: 由于'仅显示Boss内容'设置, 过滤器已禁用
 				}
 			}
@@ -170,9 +170,9 @@ Mods: {
 
 			HintTexts: {
 				MarkEntry: 右键条目以将其标记为已击败
-				HideEntry: 长按Alt并右键条目以将其从列表中隐藏
+				HideEntry: 左键或右键条目以将其从列表中隐藏
 				ClearMarked: 长按Alt并左键过滤器标签以将所有被标记的条目恢复至原始击败状态
-				ClearHidden: 长按Alt并右键'切换可见性'按钮以将所有被隐藏的条目恢复至原始隐藏状态
+				ClearHidden: 长按Alt并右键'切换隐藏列表'按钮以将所有被隐藏的条目恢复至原始隐藏状态
 				ClearItems: 长按Alt并右键宝藏袋以将该条目页面的所有物品标记为未获取
 				RemoveItem: 长按Alt并右键条目页面内的物品以将选定的物品标记为未获取
 				ClearAllRecords: 长按Alt并右键'全部记录子类'按钮以清除该Boss的所有记录
