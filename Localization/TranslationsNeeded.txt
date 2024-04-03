@@ -4,6 +4,6 @@ it-IT, 0/312, 0%, missing 312
 fr-FR, 0/312, 0%, missing 312
 es-ES, 80/312, 26%, missing 232
 ru-RU, 287/312, 92%, missing 25
-zh-Hans, 305/312, 98%, missing 7
+zh-Hans, 312/312, 100%, missing 0
 pt-BR, 61/312, 20%, missing 251
 pl-PL, 0/312, 0%, missing 312

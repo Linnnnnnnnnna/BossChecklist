@@ -392,7 +392,7 @@ namespace BossChecklist.UIElements
 					BossChecklist.BossLogConfig.FilterEvents = ConfigHoverText = Cycle(BossChecklist.BossLogConfig.FilterEvents);
 				}
 				else if (Id == "Hidden") {
-					LogUI.showHidden = !LogUI.showHidden;
+					LogUI.HiddenEntriesMode = !LogUI.HiddenEntriesMode;
 				}
 				else if (Id == "Marked") {
 					// TODO: list only marked entries
@@ -556,7 +556,7 @@ namespace BossChecklist.UIElements
 				}
 
 				/// Everything below is being set up for loot related itemslots ///
-				EntryInfo entry = LogUI.GetLogEntryInfo;\
+				EntryInfo entry = LogUI.GetLogEntryInfo;
 				bool expertRestricted = item.expert && !Main.expertMode;
 				bool masterRestricted = item.master && !Main.masterMode;
 				bool OWmusicRestricted = BossChecklist.bossTracker.otherWorldMusicBoxTypes.Contains(item.type) && !BossLogUI.OtherworldUnlocked;
@@ -1231,13 +1231,18 @@ namespace BossChecklist.UIElements
 			public TableOfContents(int index, string displayName, Color entryColor, bool loot, bool collect, float textScale = 1, bool large = false) : base(displayName, textScale, large) {
 				this.entry = BossChecklist.bossTracker.SortedEntries[index];
 				this.displayName = displayName;
-				this.markAsNext = BossChecklist.BossLogConfig.DrawNextMark && entry.IsUpNext && !entry.hidden;
+				this.markAsNext = BossChecklist.BossLogConfig.DrawNextMark && entry.IsUpNext && !entry.hidden && !GetParentLog.HiddenEntriesMode;
 				this.allLoot = loot;
 				this.allCollectibles = collect;
 				TextColor = this.defaultColor = markAsNext && BossChecklist.BossLogConfig.ColoredBossText ? new Color(248, 235, 91) : entryColor;
 			}
 
 			public override void LeftClick(UIMouseEvent evt) {
+				if (GetParentLog.HiddenEntriesMode) {
+					UpdateEntry(true);
+					return;
+				}
+
 				if (BossChecklist.BossLogConfig.ProgressiveChecklist && !entry.IsAutoDownedOrMarked && !entry.IsUpNext)
 					return;
 
@@ -1245,45 +1250,7 @@ namespace BossChecklist.UIElements
 			}
 
 			public override void RightClick(UIMouseEvent evt) {
-				// Right-click an entry to mark it as completed
-				// Hold alt and right-click an entry to hide it
-				if (Main.keyState.IsKeyDown(Keys.LeftAlt) || Main.keyState.IsKeyDown(Keys.RightAlt)) {
-					entry.hidden = !entry.hidden;
-					if (entry.hidden) {
-						WorldAssist.HiddenEntries.Add(entry.Key);
-					}
-					else {
-						WorldAssist.HiddenEntries.Remove(entry.Key);
-					}
-
-					BossUISystem.Instance.bossChecklistUI.UpdateCheckboxes(); // update the legacy checklist
-					Networking.RequestHiddenEntryUpdate(entry.Key, entry.hidden);
-				}
-				else {
-					// Entries must not already be downed to add/remove them from the MarkedEntries list
-					// Entries that are downed will automatically be removed from the lsit when the TableOfContents list is generated
-					if (WorldAssist.MarkedEntries.Contains(entry.Key)) {
-						WorldAssist.MarkedEntries.Remove(entry.Key);
-					}
-					else {
-						WorldAssist.MarkedEntries.Add(entry.Key);
-					}
-					
-					Networking.RequestMarkedEntryUpdate(entry.Key, entry.MarkedAsDowned);
-				}
-
-				// Update tabs when an entry is hidden/unhidden or marked/unmarked
-				if (entry.type == EntryType.Boss) {
-					GetParentLog.BossTab.Anchor = BossLogUI.FindNextEntry(EntryType.Boss);
-				}
-				else if (entry.type == EntryType.MiniBoss) {
-					GetParentLog.MiniBossTab.Anchor = BossLogUI.FindNextEntry(EntryType.MiniBoss);
-				}
-				else if (entry.type == EntryType.Event) {
-					GetParentLog.EventTab.Anchor = BossLogUI.FindNextEntry(EntryType.Event);
-				}
-
-				GetParentLog.RefreshPageContent(); // refresh the page to show visual changes
+				UpdateEntry(GetParentLog.HiddenEntriesMode);
 			}
 
 			public override void MouseOver(UIMouseEvent evt) {
@@ -1300,6 +1267,46 @@ namespace BossChecklist.UIElements
 				SetText(displayName);
 				TextColor = defaultColor;
 				base.MouseOut(evt);
+			}
+
+			public void UpdateEntry(bool hide) {
+				if (hide) {
+					entry.hidden = !entry.hidden;
+					if (entry.hidden) {
+						WorldAssist.HiddenEntries.Add(entry.Key);
+					}
+					else {
+						WorldAssist.HiddenEntries.Remove(entry.Key);
+					}
+
+					BossUISystem.Instance.bossChecklistUI.UpdateCheckboxes(); // update the legacy checklist
+					Networking.RequestHiddenEntryUpdate(entry.Key, entry.hidden);
+				}
+				else { // assume mark
+					// Entries must not already be downed to add/remove them from the MarkedEntries list
+					// Entries that are downed will automatically be removed from the lsit when the TableOfContents list is generated
+					if (WorldAssist.MarkedEntries.Contains(entry.Key)) {
+						WorldAssist.MarkedEntries.Remove(entry.Key);
+					}
+					else {
+						WorldAssist.MarkedEntries.Add(entry.Key);
+					}
+
+					Networking.RequestMarkedEntryUpdate(entry.Key, entry.MarkedAsDowned);
+				}
+
+				// Update tabs when an entry is hidden/unhidden or marked/unmarked
+				if (entry.type == EntryType.Boss) {
+					GetParentLog.BossTab.Anchor = BossLogUI.FindNextEntry(EntryType.Boss);
+				}
+				else if (entry.type == EntryType.MiniBoss) {
+					GetParentLog.MiniBossTab.Anchor = BossLogUI.FindNextEntry(EntryType.MiniBoss);
+				}
+				else if (entry.type == EntryType.Event) {
+					GetParentLog.EventTab.Anchor = BossLogUI.FindNextEntry(EntryType.Event);
+				}
+
+				GetParentLog.RefreshPageContent(); // refresh the page to show visual changes
 			}
 
 			public override void Draw(SpriteBatch spriteBatch) {
@@ -1326,12 +1333,17 @@ namespace BossChecklist.UIElements
 					if (Main.MouseScreen.Between(chestPos.TopLeft(), chestPos.BottomRight())) {
 						BossUISystem.Instance.UIHoverText = hoverText;
 					}
-				}
+				}					
 
 				Asset<Texture2D> checkGrid = BossLogUI.Texture_Check_Box;
 				string checkType = BossChecklist.BossLogConfig.SelectedCheckmarkType;
 
-				if (entry.IsAutoDownedOrMarked) {
+				if (GetParentLog.HiddenEntriesMode) {
+					// Do not draw checkmark status if HiddenEntriesMode is enabled. Eye toggle buttons should appear instead.
+					checkGrid = entry.hidden ? TextureAssets.InventoryTickOff : TextureAssets.InventoryTickOn;
+					pos.Y += 7;
+				}
+				else if (entry.IsAutoDownedOrMarked) {
 					if (checkType == BossLogConfiguration.CheckType_XAndEmpty) {
 						checkGrid = BossLogUI.Texture_Check_X;
 					}
@@ -1367,7 +1379,10 @@ namespace BossChecklist.UIElements
 					}
 				}
 
-				if (!entry.hidden && checkType != BossLogConfiguration.CheckType_StrikeThrough) {
+				if (GetParentLog.HiddenEntriesMode) {
+					spriteBatch.Draw(checkGrid.Value, pos, Color.White);
+				}
+				else if (!entry.hidden && checkType != BossLogConfiguration.CheckType_StrikeThrough) {
 					spriteBatch.Draw(BossLogUI.Texture_Check_Box.Value, pos, Color.White);
 					spriteBatch.Draw(checkGrid.Value, pos, Color.White);
 				}

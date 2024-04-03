@@ -2,10 +2,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ReLogic.Content;
+using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
@@ -16,9 +17,8 @@ using Terraria.ModLoader.Config;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
-using static BossChecklist.UIElements.BossLogUIElements;
 using Terraria.GameContent.ItemDropRules;
-using System.Reflection;
+using static BossChecklist.UIElements.BossLogUIElements;
 
 namespace BossChecklist
 {
@@ -100,9 +100,10 @@ namespace BossChecklist
 		public ProgressBar hardmodeBar;
 		public LogScrollbar scrollOne; // scroll bars for table of contents lists (and other elements too)
 		public LogScrollbar scrollTwo;
-		public bool showHidden = false; // when true, hidden entries are visible on the list
+		public bool HiddenEntriesMode = false; // when true, hidden entries are visible on the list
 		public bool barState = false; // when true, hovering over the progress bar will split up the entry percentages by mod instead of entry type
 		public UIList pageTwoItemList; // Item slot lists that include: Loot tables, spawn item, and collectibles
+		//public bool 
 
 		// Credits related
 		public readonly Dictionary<string, string> contributors = new Dictionary<string, string>() {
@@ -620,7 +621,7 @@ namespace BossChecklist
 			}
 
 			// ...Hidden Entries
-			FilterIcons[3].check = showHidden ? Texture_Check_Check : Texture_Check_X;
+			FilterIcons[3].check = HiddenEntriesMode ? Texture_Check_Check : Texture_Check_X;
 		}
 
 		public void ClearHiddenList() {
@@ -638,7 +639,6 @@ namespace BossChecklist
 			MiniBossTab.Anchor = FindNextEntry(EntryType.MiniBoss);
 			EventTab.Anchor = FindNextEntry(EntryType.Event);
 
-			showHidden = false;
 			RefreshPageContent();
 		}
 
@@ -984,11 +984,16 @@ namespace BossChecklist
 		private void RegenerateInteractionHoverTexts() {
 			string interactions = null;
 			if (PageNum == Page_TableOfContents) {
-				interactions =
-					Language.GetTextValue($"{LangLog}.HintTexts.MarkEntry") +
-					(BossChecklist.BossLogConfig.Debug.EnabledResetOptions ? "\n" + Language.GetTextValue($"{LangLog}.HintTexts.ClearMarked") : "") +
-					"\n" + Language.GetTextValue($"{LangLog}.HintTexts.HideEntry") +
+				if (HiddenEntriesMode) {
+					interactions =
+					Language.GetTextValue($"{LangLog}.HintTexts.HideEntry") +
 					(BossChecklist.BossLogConfig.Debug.EnabledResetOptions ? "\n" + Language.GetTextValue($"{LangLog}.HintTexts.ClearHidden") : "");
+				}
+				else {
+					interactions =
+					Language.GetTextValue($"{LangLog}.HintTexts.MarkEntry") +
+					(BossChecklist.BossLogConfig.Debug.EnabledResetOptions ? "\n" + Language.GetTextValue($"{LangLog}.HintTexts.ClearMarked") : "");
+				}
 			}
 			else if (PageNum >= 0 && BossChecklist.BossLogConfig.Debug.EnabledResetOptions) {
 				if (SelectedSubPage == SubPage.Records && GetLogEntryInfo.type == EntryType.Boss) {
@@ -1171,7 +1176,10 @@ namespace BossChecklist
 				}
 
 				Color textColor = Color.PapayaWhip; // default color when ColoredBossText is false
-				if ((!entry.available() && !entry.IsAutoDownedOrMarked) || entry.hidden) {
+				if (HiddenEntriesMode) {
+					textColor = entry.hidden ? Color.DimGray : Color.DarkGray;
+				}
+				else if ((!entry.available() && !entry.IsAutoDownedOrMarked) || entry.hidden) {
 					textColor = Color.DimGray; // Hidden or Unavailable entry text color takes priority over all other text color alterations
 				}
 				else if (BossChecklist.BossLogConfig.ColoredBossText) {

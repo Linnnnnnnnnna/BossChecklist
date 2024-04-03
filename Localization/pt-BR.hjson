@@ -50,7 +50,7 @@ Mods: {
 					// Show: "{0}: Shown"
 					// Hide: "{0}: Hidden"
 					// HideWhenCompleted: "{0}: Hidden when defeated"
-					// ToggleVisibility: Toggle hidden visibility
+					// ToggleVisibility: Toggle hidden list
 					// Disabled: Filter disabled due to 'Only Show Boss Content' config
 				}
 			}
@@ -170,9 +170,9 @@ Mods: {
 
 			HintTexts: {
 				// MarkEntry: Mark an entry in the checklist as defeated by right-clicking it
-				// HideEntry: Hide an entry from the checklist by holding alt and right-clicking it
+				// HideEntry: Hide an entry from the checklist by left or right-clicking it
 				// ClearMarked: Clear all marked entries to their original defeated state by holding alt and right-clicking the filters tab
-				// ClearHidden: Clear all hidden entries to their original hidden state by holding alt and right-clicking the 'Toggle hidden visibility' filter
+				// ClearHidden: Clear all hidden entries to their original hidden state by holding alt and right-clicking the 'Toggle hidden list' filter
 				// ClearItems: Mark all items on this entry's page as unobtained by holding alt and right-clicking the treasure bag
 				// RemoveItem: Mark an item as unobtained by holding alt and right-clicking the desired item slot
 				// ClearAllRecords: Clear all records for this boss by holding alt and right-clicking the 'Cycle Record SubCategory' button
