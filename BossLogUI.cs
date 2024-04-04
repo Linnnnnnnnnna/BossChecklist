@@ -19,6 +19,7 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using Terraria.GameContent.ItemDropRules;
 using static BossChecklist.UIElements.BossLogUIElements;
+using Terraria.Audio;
 
 namespace BossChecklist
 {
@@ -56,7 +57,7 @@ namespace BossChecklist
 				if (value == -3) {
 					OpenProgressionModePrompt();
 				}
-				else {
+				else if (!HiddenEntriesMode) {
 					UpdateSelectedPage(value, SelectedSubPage);
 				}
 			}
@@ -100,10 +101,32 @@ namespace BossChecklist
 		public ProgressBar hardmodeBar;
 		public LogScrollbar scrollOne; // scroll bars for table of contents lists (and other elements too)
 		public LogScrollbar scrollTwo;
-		public bool HiddenEntriesMode = false; // when true, hidden entries are visible on the list
 		public bool barState = false; // when true, hovering over the progress bar will split up the entry percentages by mod instead of entry type
 		public UIList pageTwoItemList; // Item slot lists that include: Loot tables, spawn item, and collectibles
-		//public bool 
+
+		public Dictionary<string, bool> HiddenEntriesPending = new Dictionary<string, bool>();
+		private bool hiddenListOpen = false;
+		public bool HiddenEntriesMode {
+			get => hiddenListOpen;
+			set {
+				hiddenListOpen = value;
+				if (value is false) {
+					foreach (KeyValuePair<string, bool> hiddenState in HiddenEntriesPending) {
+						if (!hiddenState.Value) {
+							WorldAssist.HiddenEntries.Remove(hiddenState.Key);
+						}
+						else if (!WorldAssist.HiddenEntries.Contains(hiddenState.Key)) {
+							WorldAssist.HiddenEntries.Add(hiddenState.Key);
+						}
+					}
+					SoundEngine.PlaySound(HiddenEntriesPending.Count > 0 ? SoundID.ResearchComplete : SoundID.MenuClose);
+					HiddenEntriesPending.Clear();
+				}
+				else {
+					SoundEngine.PlaySound(SoundID.MenuOpen);
+				}
+			}
+		}
 
 		// Credits related
 		public readonly Dictionary<string, string> contributors = new Dictionary<string, string>() {
@@ -179,14 +202,19 @@ namespace BossChecklist
 		private bool bossLogVisible;
 		internal static bool PendingToggleBossLogUI; // Allows toggling boss log visibility from methods not run during UIScale so Main.screenWidth/etc are correct for ResetUIPositioning method
 		internal static bool PendingConfigChange; // Allows configs to be updated on Log close, when needed
+
+		internal List<int> HiddenIndexes;
+		internal static bool PendingHiddenChange; // Updates Table of Contents hidden entries once the hidden list is closed
 		
 		private bool PendingPageChange; // Allows changing the page outside of the UIState without causing ordering or drawing issues.
 		private int PageChangeValue;
 		public int PendingPageNum {
 			get => PageChangeValue;
 			set {
-				PageChangeValue = value;
-				PendingPageChange = true;
+				if (!HiddenEntriesMode) {
+					PageChangeValue = value;
+					PendingPageChange = true;
+				}
 			}
 		}
 
@@ -246,10 +274,6 @@ namespace BossChecklist
 					PageNum = BossChecklist.BossLogConfig.PromptDisabled ? Page_TableOfContents : Page_Prompt;
 				}
 				else {
-					BossTab.Anchor = FindNextEntry(EntryType.Boss); // Update the Anchors for all entry tabs every time the Boss Log is opened
-					MiniBossTab.Anchor = FindNextEntry(EntryType.MiniBoss);
-					EventTab.Anchor = FindNextEntry(EntryType.Event);
-
 					if (GetModPlayer.enteredWorldReset) {
 						// If the Log has been opened before, check for a world change.
 						// This is to reset the page from what the user previously had back to the Table of Contents when entering another world.
@@ -268,6 +292,10 @@ namespace BossChecklist
 			}
 			else if (PageNum >= 0 && GetLogEntryInfo.IsRecordIndexed(out int selectedEntryIndex) && GetModPlayer.hasNewRecord.Length > 0) {
 				GetModPlayer.hasNewRecord[selectedEntryIndex] = false; // If UI is closed on a new record page, remove the new record from the list
+			}
+			else if (PageNum == Page_TableOfContents && HiddenEntriesMode) {
+				HiddenEntriesPending.Clear(); // closing the hide list in anyway other than the filter button should not save hidden statuses
+				HiddenEntriesMode = false;
 			}
 
 			BossLogVisible = show; // Setting the state makes the UIElements append/remove making them visible/invisible
@@ -393,7 +421,7 @@ namespace BossChecklist
 				new FilterIcon(Texture_Nav_Boss) { Id = "Boss" },
 				new FilterIcon(Texture_Nav_MiniBoss) { Id = "MiniBoss" },
 				new FilterIcon(Texture_Nav_Event) { Id = "Event" },
-				new FilterIcon(Texture_Content_ToggleHidden) { Id = "Hidden" },
+				new FilterIcon(RequestVanillaTexture($"Images/Item_{ItemID.EchoMonolith}")) { Id = "Hidden" },
 			};
 
 			int offsetY = 0;
@@ -477,6 +505,8 @@ namespace BossChecklist
 
 			// scroll two is used in more areas, such as the display spawn info message box, so its fields are set when needed
 			scrollTwo = new LogScrollbar();
+
+			HiddenIndexes = new List<int>();
 		}
 
 		public override void Update(GameTime gameTime) {
@@ -561,6 +591,9 @@ namespace BossChecklist
 			if (tabClicked && PageNum != Page_TableOfContents)
 				return; // Filter tab position should not change if not on the Table of Contents page when clicked
 
+			if (HiddenEntriesMode)
+				return; // The Hidden List should be confirmed and closed before being able to close the filters tab
+
 			if (PageNum != Page_TableOfContents) {
 				filterOpen = false; // If the page is not on the Table of Contents, the filters tab should be in the closed position
 			}
@@ -619,9 +652,6 @@ namespace BossChecklist
 			else {
 				FilterIcons[2].check = Texture_Check_Next;
 			}
-
-			// ...Hidden Entries
-			FilterIcons[3].check = HiddenEntriesMode ? Texture_Check_Check : Texture_Check_X;
 		}
 
 		public void ClearHiddenList() {
@@ -634,11 +664,6 @@ namespace BossChecklist
 			WorldAssist.HiddenEntries.Clear();
 			BossUISystem.Instance.bossChecklistUI.UpdateCheckboxes();
 			Networking.RequestHiddenEntryUpdate();
-
-			BossTab.Anchor = FindNextEntry(EntryType.Boss);
-			MiniBossTab.Anchor = FindNextEntry(EntryType.MiniBoss);
-			EventTab.Anchor = FindNextEntry(EntryType.Event);
-
 			RefreshPageContent();
 		}
 
@@ -651,12 +676,11 @@ namespace BossChecklist
 
 			WorldAssist.MarkedEntries.Clear();
 			Networking.RequestMarkedEntryUpdate();
-
-			BossTab.Anchor = FindNextEntry(EntryType.Boss);
-			MiniBossTab.Anchor = FindNextEntry(EntryType.MiniBoss);
-			EventTab.Anchor = FindNextEntry(EntryType.Event);
-
 			RefreshPageContent();
+		}
+
+		public void UpdateEntryHiddenStatus() {
+
 		}
 
 		/// <summary>
@@ -953,6 +977,10 @@ namespace BossChecklist
 				OpenProgressionModePrompt();
 				return; // If the page is somehow the prompt, redirect to the open prompt method
 			}
+
+			BossTab.Anchor = FindNextEntry(EntryType.Boss); // Updates the 'next' entries for the tabs and next checkmark
+			MiniBossTab.Anchor = FindNextEntry(EntryType.MiniBoss);
+			EventTab.Anchor = FindNextEntry(EntryType.Event);
 
 			RegenerateInteractionHoverTexts(); // Updates the hover text for the alternate interactive keys list has
 			ResetUIPositioning(); // Repositions common ui elements when the UI is updated

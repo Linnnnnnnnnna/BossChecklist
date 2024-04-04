@@ -364,7 +364,7 @@ namespace BossChecklist.UIElements
 
 				return Id switch {
 					"Marked" => "", // TODO: Marked hovertext
-					"Hidden" => $"{LangFilter}.ToggleVisibility",
+					"Hidden" => $"{LangFilter}.ToggleHidden" + (LogUI.HiddenEntriesMode ? "Close" : "Open"),
 					_ => Language.GetTextValue($"{LangFilter}.{GetConfigValue().Replace(" ", "")}", Language.GetTextValue($"{LangCommon}.{Id}Plural"))
 				};
 			}
@@ -413,7 +413,15 @@ namespace BossChecklist.UIElements
 
 			public override void Draw(SpriteBatch spriteBatch) {
 				Rectangle inner = GetInnerDimensions().ToRectangle();
-				spriteBatch.Draw(icon.Value, inner, Color.White);
+				Color color = Color.White;
+				float scale = 1f;
+				Vector2 pos = inner.TopLeft();
+				if (Id == "Hidden") {
+					color = LogUI.HiddenEntriesMode ? Color.White : Color.DimGray;
+					scale = LogUI.HiddenEntriesMode ? Main.cursorScale : 1f;
+					pos = inner.Center() - new Vector2(icon.Value.Width / 2 * scale, icon.Value.Height / 2 * scale);
+				}
+				spriteBatch.Draw(icon.Value, pos, icon.Value.Bounds, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 1f);
 				if (check != null)
 					spriteBatch.Draw(check.Value, new Vector2(inner.X + inner.Width - 10, inner.Y + inner.Height - 15), Color.White);
 
@@ -1239,7 +1247,15 @@ namespace BossChecklist.UIElements
 
 			public override void LeftClick(UIMouseEvent evt) {
 				if (GetParentLog.HiddenEntriesMode) {
-					UpdateEntry(true);
+					entry.hidden = !entry.hidden;
+					SoundEngine.PlaySound(SoundID.Unlock);
+					TextColor = this.defaultColor = entry.hidden ? Color.DimGray : Color.DarkGray;
+					if (!GetParentLog.HiddenEntriesPending.ContainsKey(entry.Key)) {
+						GetParentLog.HiddenEntriesPending.Add(entry.Key, entry.hidden);
+					}
+					else {
+						GetParentLog.HiddenEntriesPending[entry.Key] = entry.hidden;
+					}
 					return;
 				}
 
@@ -1250,7 +1266,31 @@ namespace BossChecklist.UIElements
 			}
 
 			public override void RightClick(UIMouseEvent evt) {
-				UpdateEntry(GetParentLog.HiddenEntriesMode);
+				if (GetParentLog.HiddenEntriesMode) {
+					entry.hidden = !entry.hidden;
+					SoundEngine.PlaySound(SoundID.Unlock);
+					TextColor = this.defaultColor = entry.hidden ? Color.DimGray : Color.DarkGray;
+					if (!GetParentLog.HiddenEntriesPending.ContainsKey(entry.Key)) {
+						GetParentLog.HiddenEntriesPending.Add(entry.Key, entry.hidden);
+					}
+					else {
+						GetParentLog.HiddenEntriesPending[entry.Key] = entry.hidden;
+					}
+				}
+				else {
+					// Entries must not already be downed to add/remove them from the MarkedEntries list
+					// Entries that are downed will automatically be removed from the lsit when the TableOfContents list is generated
+					if (WorldAssist.MarkedEntries.Contains(entry.Key)) {
+						WorldAssist.MarkedEntries.Remove(entry.Key);
+					}
+					else {
+						WorldAssist.MarkedEntries.Add(entry.Key);
+					}
+
+					Networking.RequestMarkedEntryUpdate(entry.Key, entry.MarkedAsDowned);
+
+					GetParentLog.RefreshPageContent(); // refresh the page to show visual changes
+				}
 			}
 
 			public override void MouseOver(UIMouseEvent evt) {
@@ -1269,46 +1309,6 @@ namespace BossChecklist.UIElements
 				base.MouseOut(evt);
 			}
 
-			public void UpdateEntry(bool hide) {
-				if (hide) {
-					entry.hidden = !entry.hidden;
-					if (entry.hidden) {
-						WorldAssist.HiddenEntries.Add(entry.Key);
-					}
-					else {
-						WorldAssist.HiddenEntries.Remove(entry.Key);
-					}
-
-					BossUISystem.Instance.bossChecklistUI.UpdateCheckboxes(); // update the legacy checklist
-					Networking.RequestHiddenEntryUpdate(entry.Key, entry.hidden);
-				}
-				else { // assume mark
-					// Entries must not already be downed to add/remove them from the MarkedEntries list
-					// Entries that are downed will automatically be removed from the lsit when the TableOfContents list is generated
-					if (WorldAssist.MarkedEntries.Contains(entry.Key)) {
-						WorldAssist.MarkedEntries.Remove(entry.Key);
-					}
-					else {
-						WorldAssist.MarkedEntries.Add(entry.Key);
-					}
-
-					Networking.RequestMarkedEntryUpdate(entry.Key, entry.MarkedAsDowned);
-				}
-
-				// Update tabs when an entry is hidden/unhidden or marked/unmarked
-				if (entry.type == EntryType.Boss) {
-					GetParentLog.BossTab.Anchor = BossLogUI.FindNextEntry(EntryType.Boss);
-				}
-				else if (entry.type == EntryType.MiniBoss) {
-					GetParentLog.MiniBossTab.Anchor = BossLogUI.FindNextEntry(EntryType.MiniBoss);
-				}
-				else if (entry.type == EntryType.Event) {
-					GetParentLog.EventTab.Anchor = BossLogUI.FindNextEntry(EntryType.Event);
-				}
-
-				GetParentLog.RefreshPageContent(); // refresh the page to show visual changes
-			}
-
 			public override void Draw(SpriteBatch spriteBatch) {
 				Rectangle inner = GetInnerDimensions().ToRectangle();
 				Vector2 pos = new Vector2(inner.X - 20, inner.Y - 5);
@@ -1324,7 +1324,7 @@ namespace BossChecklist.UIElements
 				string looted = Language.GetTextValue($"{BossLogUI.LangLog}.TableOfContents.AllLoot");
 				string collected = Language.GetTextValue($"{BossLogUI.LangLog}.TableOfContents.AllCollectibles");
 
-				if (allLoot) {
+				if (!GetParentLog.HiddenEntriesMode && allLoot) {
 					// When all loot is obtained, also check for collectibles as a bonus
 					Texture2D texture = !BossChecklist.BossLogConfig.OnlyCheckDroppedLoot && allCollectibles ? BossLogUI.Texture_Check_GoldChest.Value : BossLogUI.Texture_Check_Chest.Value;
 					string hoverText = !BossChecklist.BossLogConfig.OnlyCheckDroppedLoot && allCollectibles ? $"{looted}\n{collected}" : looted;
@@ -1542,6 +1542,9 @@ namespace BossChecklist.UIElements
 			}
 
 			public override void Draw(SpriteBatch spriteBatch) {
+				if (LogUI.HiddenEntriesMode)
+					return;
+
 				base.Draw(spriteBatch);
 				Rectangle inner = GetInnerDimensions().ToRectangle();
 

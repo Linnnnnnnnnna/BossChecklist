@@ -50,7 +50,8 @@ Mods: {
 					Show: "{0}: Показаны"
 					Hide: "{0}: Скрыты"
 					HideWhenCompleted: "{0}: Скрыты после победы"
-					ToggleVisibility: Переключить видимость скрытых целей
+					// ToggleHiddenOpen: Open hidden list
+					// ToggleHiddenClose: Confirm & close hidden list
 					Disabled: Фильтр отключён из-за настройки 'Босс-журнал показывает только боссов'
 				}
 			}
