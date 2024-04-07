@@ -50,8 +50,8 @@ Mods: {
 					Show: "{0}: 显示"
 					Hide: "{0}: 隐藏"
 					HideWhenCompleted: "{0}: 隐藏已击败的"
-					// ToggleHiddenOpen: Open hidden list
-					// ToggleHiddenClose: Confirm & close hidden list
+					ToggleHiddenOpen: 打开隐藏列表
+					ToggleHiddenClose: 确认 & 关闭隐藏列表
 					Disabled: 由于'仅显示Boss内容'设置, 过滤器已禁用
 				}
 			}
