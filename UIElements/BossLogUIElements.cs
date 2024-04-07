@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BossChecklist.Resources;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
@@ -188,7 +189,7 @@ namespace BossChecklist.UIElements
 				if (!IsMouseHovering && !dragging)
 					coverColor = new Color(coverColor.R, coverColor.G, coverColor.B, 128);
 
-				spriteBatch.Draw(!IsMouseHovering && !dragging ? BossLogUI.Texture_Button_Faded.Value : BossLogUI.Texture_Button_Color.Value, inner, coverColor);
+				spriteBatch.Draw(!IsMouseHovering && !dragging ? BossLogResources.Button_Faded.Value : BossLogResources.Button_Color.Value, inner, coverColor);
 
 				// UIImageButtons are normally faded, so if dragging and not draw the button fully opaque
 				// This is most likely to occur when the mouse travels off screen while dragging
@@ -196,7 +197,7 @@ namespace BossChecklist.UIElements
 					spriteBatch.Draw(texture.Value, inner, Color.White);
 
 				if (borderColor.HasValue)
-					spriteBatch.Draw(BossLogUI.Texture_Button_Border.Value, inner, borderColor.Value); // Draw a colored border if one was set
+					spriteBatch.Draw(BossLogResources.Button_Border.Value, inner, borderColor.Value); // Draw a colored border if one was set
 			}
 		}
 
@@ -267,13 +268,13 @@ namespace BossChecklist.UIElements
 
 		internal class IndicatorPanel : LogUIElement {
 			public string Id { get; init; } = "";
-			private readonly Asset<Texture2D> section = BossLogUI.RequestResource("LogUI_IndicatorSection");
-			private readonly Asset<Texture2D> end = BossLogUI.RequestResource("LogUI_IndicatorEnd");
-			private readonly Asset<Texture2D> back = BossLogUI.RequestResource("Indicator_Back");
+			private Asset<Texture2D> section;
+			private Asset<Texture2D> end;
+			private Asset<Texture2D> back;
 
 			public IndicatorPanel(int iconCount) {
-				Width.Pixels = (end.Value.Width * 2) + ((back.Value.Width + 2) * iconCount - 2);
-				Height.Pixels = end.Value.Height;
+				Width.Pixels = (10 * 2) + ((18 + 2) * iconCount - 2); // indicator end panel width = 10; indicator back width = 18;
+				Height.Pixels = 26; // indicator panel height = 26;
 			}
 
 			public override void Draw(SpriteBatch spriteBatch) {
@@ -284,14 +285,18 @@ namespace BossChecklist.UIElements
 					return;
 
 				Rectangle inner = GetInnerDimensions().ToRectangle();
+
+				end ??= BossLogResources.RequestResource("LogUI_IndicatorEnd", true);
 				Rectangle endPanel = new Rectangle(inner.Right - end.Value.Width, inner.Y, end.Value.Width, end.Value.Height);
 				Rectangle centerPanel = new Rectangle(inner.X + end.Value.Width, inner.Y, inner.Width - (end.Value.Width * 2), inner.Height);
 
+				section ??= BossLogResources.RequestResource("LogUI_IndicatorSection", true);
 				spriteBatch.Draw(end.Value, inner.TopLeft(), Color.White);
 				spriteBatch.Draw(section.Value, centerPanel, Color.White);
 				spriteBatch.Draw(end.Value, endPanel, end.Value.Bounds, Color.White, 0f, Vector2.Zero, SpriteEffects.FlipHorizontally, 0f);
 
 				if (Id == "Configurations") {
+					back ??= BossLogResources.RequestResource("Indicator_Back", true);
 					for (int i = 0; i < Children.Count(); i++) {
 						spriteBatch.Draw(back.Value, new Vector2(centerPanel.X + (back.Value.Width + 2) * i, inner.Y + 6), Color.White);
 					}
@@ -434,6 +439,9 @@ namespace BossChecklist.UIElements
 			readonly SubPage subPageType;
 			public bool isLocked = false;
 
+			private Asset<Texture2D> selectionBorder;
+			private Asset<Texture2D> locked;
+
 			public SubPageButton(Asset<Texture2D> texture, SubPage type) : base(texture) {
 				buttonText = Language.GetTextValue($"{BossLogUI.LangLog}.Tabs.{type}");
 				subPageType = type;
@@ -444,8 +452,8 @@ namespace BossChecklist.UIElements
 
 				Rectangle inner = GetInnerDimensions().ToRectangle();
 				if (subPageType == BossLogUI.SelectedSubPage) {
-					Asset<Texture2D> border = BossLogUI.RequestResource("Nav_SubPage_Border");
-					spriteBatch.Draw(border.Value, inner, Color.White); // draw a border around the selected subpage
+					selectionBorder ??= BossLogResources.RequestResource("Nav_SubPage_Border");
+					spriteBatch.Draw(selectionBorder.Value, inner, Color.White); // draw a border around the selected subpage
 				}
 
 				bool useKillCountText = subPageType == SubPage.Records && BossUISystem.Instance.BossLog.GetLogEntryInfo.type != EntryType.Boss; // Event entries should display 'Kill Count' instead of 'Records'
@@ -456,24 +464,21 @@ namespace BossChecklist.UIElements
 
 				spriteBatch.DrawString(FontAssets.MouseText.Value, translated, pos, Color.Gold, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 
-				if (isLocked) {
-					Texture2D locked = BossLogUI.RequestVanillaTexture("Images/UI/Workshop/PublicityPrivate").Value;
-					pos = new Vector2(inner.X + (inner.Width / 2 - locked.Width / 2), inner.Y + inner.Height / 2 - locked.Height / 2);
-					spriteBatch.Draw(locked, pos, Color.White);
+				if (isLocked && BossChecklist.BossLogConfig.ProgressiveChecklist) {
+					locked ??= BossLogResources.RequestVanillaTexture("UI/Workshop/PublicityPrivate", true);
+					pos = new Vector2(inner.X + (inner.Width / 2 - locked.Value.Width / 2), inner.Y + inner.Height / 2 - locked.Value.Height / 2);
+					spriteBatch.Draw(locked.Value, pos, Color.White);
 				}
 			}
 		}
 
 		internal class TreasureBag : LogUIElement {
 			internal int itemType = 0;
-			internal Asset<Texture2D> bagTexture = BossLogUI.RequestResource("Extra_TreasureBag");
+			private readonly Asset<Texture2D> bagTexture;
 
 			public TreasureBag(int bag) {
-				if (bag > 0) {
-					itemType = bag;
-					Main.instance.LoadItem(LogUI.GetLogEntryInfo.TreasureBag);
-					bagTexture = TextureAssets.Item[bag];
-				}
+				itemType = bag > 0 ? bag : 0;
+				bagTexture = bag > 0 ? BossLogResources.RequestItemTexture(bag) : BossLogResources.RequestResource("Extra_TreasureBag", true);
 
 				Width.Set(bagTexture.Value.Height, 0f);
 				Height.Set(bagTexture.Value.Height, 0f);
@@ -509,6 +514,12 @@ namespace BossChecklist.UIElements
 			private readonly float scale;
 			internal bool hasItem;
 			internal bool itemResearched;
+
+			private Asset<Texture2D> highlight;
+			private Asset<Texture2D> checkmark;
+			private Asset<Texture2D> expertModeIcon;
+			private Asset<Texture2D> masterModeIcon;
+			private Asset<Texture2D> otherWorldIcon;
 
 			public LogItemSlot(Item item, int context = ItemSlot.Context.TrashItem, float scale = 1f) {
 				this.context = context;
@@ -568,6 +579,7 @@ namespace BossChecklist.UIElements
 				bool expertRestricted = item.expert && !Main.expertMode;
 				bool masterRestricted = item.master && !Main.masterMode;
 				bool OWmusicRestricted = BossChecklist.bossTracker.otherWorldMusicBoxTypes.Contains(item.type) && !BossLogUI.OtherworldUnlocked;
+				bool isRestricted = expertRestricted || masterRestricted || OWmusicRestricted;
 
 				// Make a backups of the original itemslot texture and alter the texture to display the color needed
 				// If the config 'Hide boss drops' is enabled and the boss hasn't been defeated yet, the itemslot should appear red, even if the item was already obtained
@@ -579,7 +591,7 @@ namespace BossChecklist.UIElements
 				if (hasItem) {
 					TextureAssets.InventoryBack7 = TextureAssets.InventoryBack3;
 				}
-				else if (expertRestricted || masterRestricted || OWmusicRestricted) {
+				else if (isRestricted) {
 					TextureAssets.InventoryBack7 = TextureAssets.InventoryBack11;
 				}
 				
@@ -590,40 +602,48 @@ namespace BossChecklist.UIElements
 				item.color = oldColor; // if the item was masked
 
 				// Draw golden border around items that are considered collectibles
-				if (entry.collectibles.ContainsKey(item.type))
-					spriteBatch.Draw(BossLogUI.RequestResource("Extra_HighlightedCollectible").Value, inner.TopLeft(), Color.White);
+				if (entry.collectibles.ContainsKey(item.type)) {
+					highlight ??= BossLogResources.RequestResource("Extra_HighlightedCollectible");
+					spriteBatch.Draw(highlight.Value, inner.TopLeft(), Color.White);
+				}
 
 				// Similar to the logic of deciding the itemslot color, decide what should be drawn and what text should show when hovering over
 				// Masked item takes priority, displaying 'Defeat this entry to show items'
 				// If the item has not been obtained, check for item restrictions and apply those icons and texts
 				// If no item restrictions exist, display normal item tooltips, and draw a checkmark for obtained items
 				Vector2 pos = new Vector2(inner.X + inner.Width / 2, inner.Y + inner.Height / 2);
+
+				if (itemResearched && (hasItem || !isRestricted)) {
+					checkmark ??= BossLogResources.RequestResource("Checks_Researched");
+					spriteBatch.Draw(checkmark.Value, pos, Color.White);
+				}
+
 				if (!hasItem) {
 					if (expertRestricted) {
-						spriteBatch.Draw(BossLogUI.RequestVanillaTexture("Images/UI/WorldCreation/IconDifficultyExpert").Value, pos, Color.White);
+						expertModeIcon ??= BossLogResources.RequestVanillaTexture("UI/WorldCreation/IconDifficultyExpert");
+						spriteBatch.Draw(expertModeIcon.Value, pos, Color.White);
 						if (IsMouseHovering) {
 							BossUISystem.Instance.UIHoverText = $"{BossLogUI.LangLog}.LootAndCollection.ItemIsExpertOnly";
 							BossUISystem.Instance.UIHoverTextColor = Main.DiscoColor; // mimics Expert Mode color
 						}
 					}
 					else if (masterRestricted) {
-						spriteBatch.Draw(BossLogUI.RequestVanillaTexture("Images/UI/WorldCreation/IconDifficultyMaster").Value, pos, Color.White);
+						masterModeIcon ??= BossLogResources.RequestVanillaTexture("UI/WorldCreation/IconDifficultyMaster");
+						spriteBatch.Draw(masterModeIcon.Value, pos, Color.White);
 						if (IsMouseHovering) {
 							BossUISystem.Instance.UIHoverText = $"{BossLogUI.LangLog}.LootAndCollection.ItemIsMasterOnly";
 							BossUISystem.Instance.UIHoverTextColor = new Color(255, (byte)(Main.masterColor * 200f), 0, Main.mouseTextColor); // mimics Master Mode color
 						}
 					}
 					else if (OWmusicRestricted) {
-						spriteBatch.Draw(BossLogUI.RequestVanillaTexture("Images/UI/WorldCreation/IconRandomSeed").Value, pos, Color.White);
+						otherWorldIcon ??= BossLogResources.RequestVanillaTexture("UI/WorldCreation/IconRandomSeed");
+						spriteBatch.Draw(otherWorldIcon.Value, pos, Color.White);
 						if (IsMouseHovering) {
 							BossUISystem.Instance.UIHoverText = $"{BossLogUI.LangLog}.LootAndCollection.ItemIsLocked";
 							BossUISystem.Instance.UIHoverTextColor = Color.Goldenrod;
 						}
 					}
 					else {
-						if (itemResearched)
-							spriteBatch.Draw(BossLogUI.RequestResource("Checks_Researched").Value, pos, Color.White);
-
 						if (IsMouseHovering) {
 							Main.HoverItem = item;
 							Main.hoverItemName = item.HoverName;
@@ -631,10 +651,7 @@ namespace BossChecklist.UIElements
 					}
 				}
 				else {
-					if (itemResearched)
-						spriteBatch.Draw(BossLogUI.RequestResource("Checks_Researched").Value, pos, Color.White);
-
-					spriteBatch.Draw(BossLogUI.Texture_Check_Check.Value, pos, Color.White);
+					spriteBatch.Draw(BossLogResources.Check_Check.Value, pos, Color.White);
 					if (IsMouseHovering) {
 						Main.HoverItem = item;
 						Main.hoverItemName = item.HoverName;
@@ -643,19 +660,10 @@ namespace BossChecklist.UIElements
 
 				// Finally, if the 'Show collectible type' config is enabled, draw their respective icons and texts where needed
 				if (BossChecklist.BossLogConfig.Debug.ShowCollectionType && entry.collectibles.TryGetValue(item.type, out CollectibleType type)) {
-					string iconType = type.ToString();
-					if (type == CollectibleType.Mount) {
-						iconType = "Pet";
-					}
-					else if (type == CollectibleType.Relic) {
-						iconType = "Trophy";
-					}
-
 					Vector2 iconPos = new Vector2(inner.Left - 4, inner.Bottom - 15);
-					spriteBatch.Draw(BossLogUI.RequestResource($"Checks_{iconType}").Value, iconPos, Color.White);
-					if (IsMouseHovering) {
+					spriteBatch.Draw(BossLogResources.Content_CollectibleType[(int)type].Value, iconPos, Color.White);
+					if (IsMouseHovering)
 						Utils.DrawBorderString(spriteBatch, type.ToString(), inner.TopLeft(), Colors.RarityAmber, 0.8f);
-					}
 				}
 			}
 		}
@@ -682,8 +690,8 @@ namespace BossChecklist.UIElements
 				base.Draw(spriteBatch);
 				Rectangle pageRect = GetInnerDimensions().ToRectangle();
 				if (Id == "") {
-					spriteBatch.Draw(BossLogUI.Texture_Log_BackPanel.Value, pageRect, BossChecklist.BossLogConfig.BossLogColor); // Main panel draws the Log Book (with color)...
-					spriteBatch.Draw(BossLogUI.Texture_Log_Paper.Value, pageRect, Color.White); //.. and the paper on top
+					spriteBatch.Draw(BossLogResources.Log_BackPanel.Value, pageRect, BossChecklist.BossLogConfig.BossLogColor); // Main panel draws the Log Book (with color)...
+					spriteBatch.Draw(BossLogResources.Log_Paper.Value, pageRect, Color.White); //.. and the paper on top
 				}
 
 				int selectedLogPage = LogUI.PageNum;
@@ -774,7 +782,7 @@ namespace BossChecklist.UIElements
 							isDefeated = $"''{Language.GetTextValue($"{BossLogUI.LangLog}.EntryPage.Defeated", Main.worldName)}''";
 						}
 
-						Asset<Texture2D> texture = entry.IsAutoDownedOrMarked ? BossLogUI.Texture_Check_Check : BossLogUI.Texture_Check_X;
+						Asset<Texture2D> texture = entry.IsAutoDownedOrMarked ? BossLogResources.Check_Check : BossLogResources.Check_X;
 						Vector2 defeatpos = new Vector2(firstHeadPos.X + (firstHeadPos.Width / 2), firstHeadPos.Y + firstHeadPos.Height - (texture.Height() / 2));
 						spriteBatch.Draw(texture.Value, defeatpos, Color.White);
 
@@ -1033,9 +1041,9 @@ namespace BossChecklist.UIElements
 
 				// Draw an achievement icon that represents the record type
 				if (ach.X >= 0 && ach.Y >= 0) {
-					Texture2D achievements = BossLogUI.RequestVanillaTexture("Images/UI/Achievements").Value;
+					Asset<Texture2D> achievements = BossLogResources.RequestVanillaTexture("UI/Achievements", false);
 					Rectangle achSlot = new Rectangle(66 * ach.X, 66 * ach.Y, 64, 64);
-					spriteBatch.Draw(achievements, inner.TopLeft(), achSlot, Color.White);
+					spriteBatch.Draw(achievements.Value, inner.TopLeft(), achSlot, Color.White);
 
 					if (Main.MouseScreen.Between(inner.TopLeft(), new Vector2(inner.X + 64, inner.Y + 64))) {
 						BossUISystem.Instance.UIHoverText = tooltip;
@@ -1096,7 +1104,7 @@ namespace BossChecklist.UIElements
 					if (mod.HasAsset("icon_workshop"))
 						return ModContent.Request<Texture2D>(mod.Name + "/icon_workshop");
 				}
-				return BossLogUI.RequestResource("Credits_NoIcon");
+				return BossLogResources.RequestResource("Credits_NoIcon");
 			}
 
 			private Point MaxLength() {
@@ -1219,7 +1227,7 @@ namespace BossChecklist.UIElements
 
 					int offsetX = inner.X < Main.screenWidth / 2 ? 2 : -2;
 					Vector2 pos = new Vector2(inner.X + (inner.Width / 2) - (icon.Value.Width / 2) + offsetX, inner.Y + (inner.Height / 2) - (icon.Value.Height / 2));
-					Asset<Texture2D> iconTexture = Id == "TableOfContents" && LogUI.PageNum == BossLogUI.Page_TableOfContents ? BossLogUI.Texture_Nav_Filter : icon;
+					Asset<Texture2D> iconTexture = Id == "TableOfContents" && LogUI.PageNum == BossLogUI.Page_TableOfContents ? BossLogResources.Nav_Filter : icon;
 					spriteBatch.Draw(iconTexture.Value, pos, Color.White);
 				}
 			}
@@ -1326,7 +1334,7 @@ namespace BossChecklist.UIElements
 
 				if (!GetParentLog.HiddenEntriesMode && allLoot) {
 					// When all loot is obtained, also check for collectibles as a bonus
-					Texture2D texture = !BossChecklist.BossLogConfig.OnlyCheckDroppedLoot && allCollectibles ? BossLogUI.Texture_Check_GoldChest.Value : BossLogUI.Texture_Check_Chest.Value;
+					Texture2D texture = !BossChecklist.BossLogConfig.OnlyCheckDroppedLoot && allCollectibles ? BossLogResources.Check_GoldChest.Value : BossLogResources.Check_Chest.Value;
 					string hoverText = !BossChecklist.BossLogConfig.OnlyCheckDroppedLoot && allCollectibles ? $"{looted}\n{collected}" : looted;
 					Rectangle chestPos = new Rectangle(parent.X + parent.Width - texture.Width - hardModeOffset, inner.Y - 2, texture.Width, texture.Height);
 					spriteBatch.Draw(texture, chestPos, Color.White);
@@ -1335,7 +1343,7 @@ namespace BossChecklist.UIElements
 					}
 				}					
 
-				Asset<Texture2D> checkGrid = BossLogUI.Texture_Check_Box;
+				Asset<Texture2D> checkGrid = BossLogResources.Check_Box;
 				string checkType = BossChecklist.BossLogConfig.SelectedCheckmarkType;
 
 				if (GetParentLog.HiddenEntriesMode) {
@@ -1345,14 +1353,14 @@ namespace BossChecklist.UIElements
 				}
 				else if (entry.IsAutoDownedOrMarked) {
 					if (checkType == BossLogConfiguration.CheckType_XAndEmpty) {
-						checkGrid = BossLogUI.Texture_Check_X;
+						checkGrid = BossLogResources.Check_X;
 					}
 					else if (checkType != BossLogConfiguration.CheckType_StrikeThrough) {
-						checkGrid = BossLogUI.Texture_Check_Check;
+						checkGrid = BossLogResources.Check_Check;
 					}
 					else {
 						Vector2 stringAdjust = FontAssets.MouseText.Value.MeasureString(displayName);
-						Asset<Texture2D> strike = BossLogUI.Texture_Check_Strike;
+						Asset<Texture2D> strike = BossLogResources.Check_Strike;
 						int w = strike.Value.Width / 3;
 						int h = strike.Value.Height;
 
@@ -1373,9 +1381,9 @@ namespace BossChecklist.UIElements
 					}
 				}
 				else {
-					checkGrid = checkType == BossLogConfiguration.CheckType_CheckAndX ? BossLogUI.Texture_Check_X : BossLogUI.Texture_Check_Box;
+					checkGrid = checkType == BossLogConfiguration.CheckType_CheckAndX ? BossLogResources.Check_X : BossLogResources.Check_Box;
 					if (markAsNext) {
-						checkGrid = BossLogUI.Texture_Check_Next;
+						checkGrid = BossLogResources.Check_Next;
 					}
 				}
 
@@ -1383,7 +1391,7 @@ namespace BossChecklist.UIElements
 					spriteBatch.Draw(checkGrid.Value, pos, Color.White);
 				}
 				else if (!entry.hidden && checkType != BossLogConfiguration.CheckType_StrikeThrough) {
-					spriteBatch.Draw(BossLogUI.Texture_Check_Box.Value, pos, Color.White);
+					spriteBatch.Draw(BossLogResources.Check_Box.Value, pos, Color.White);
 					spriteBatch.Draw(checkGrid.Value, pos, Color.White);
 				}
 			}
@@ -1395,7 +1403,7 @@ namespace BossChecklist.UIElements
 		}
 
 		internal class ProgressBar : LogUIElement {
-			internal readonly Asset<Texture2D> fullBar = BossLogUI.RequestResource("Extra_ProgressBar");
+			private Asset<Texture2D> fullBar;
 			internal readonly float percentageTotal;
 			internal readonly Point countsTotal;
 			internal Dictionary<EntryType, float> PercentagesByType;
@@ -1555,6 +1563,7 @@ namespace BossChecklist.UIElements
 				Vector2 percentPos = new Vector2(inner.X + (inner.Width / 2) - (stringAdjust.X / 2), inner.Y - stringAdjust.Y);
 				Utils.DrawBorderString(spriteBatch, percentDisplay, percentPos, Colors.RarityAmber, scale);
 
+				fullBar ??= BossLogResources.RequestResource("Extra_ProgressBar");
 				int wCut = fullBar.Value.Width / 3;
 				int h = fullBar.Value.Height;
 				int extraBar = 4; // this is the small bit of bar that is the the end sections, unless the texture is changed, this is vital

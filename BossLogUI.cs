@@ -1,4 +1,5 @@
-﻿using BossChecklist.UIElements;
+﻿using BossChecklist.Resources;
+using BossChecklist.UIElements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -8,7 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.GameContent.ItemDropRules;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
@@ -17,9 +20,7 @@ using Terraria.ModLoader.Config;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
-using Terraria.GameContent.ItemDropRules;
 using static BossChecklist.UIElements.BossLogUIElements;
-using Terraria.Audio;
 
 namespace BossChecklist
 {
@@ -129,7 +130,7 @@ namespace BossChecklist
 		}
 
 		// Credits related
-		public readonly Dictionary<string, string> contributors = new Dictionary<string, string>() {
+		public static readonly Dictionary<string, string> contributors = new Dictionary<string, string>() {
 			{ "Jopojelly", "Creator & Owner" },
 			{ "SheepishShepherd", "Co-Owner & Maintainer"},
 			{ "direwolf420", "Code Contributor" },
@@ -149,46 +150,6 @@ namespace BossChecklist
 
 		// Loot page related
 		public static bool OtherworldUnlocked = false;
-
-		// Log UI textures
-		public static Asset<Texture2D> Texture_Button_Book;
-		public static Asset<Texture2D> Texture_Button_Border;
-		public static Asset<Texture2D> Texture_Button_Color;
-		public static Asset<Texture2D> Texture_Button_Faded;
-
-		public static Asset<Texture2D> Texture_Log_BackPanel;
-		public static Asset<Texture2D> Texture_Log_Paper;
-		public static Asset<Texture2D> Texture_Log_Tab;
-		public static Asset<Texture2D> Texture_Log_Tab2;
-		public static Asset<Texture2D> Texture_Log_FilterPanel;
-
-		public static Asset<Texture2D> Texture_Nav_Prev;
-		public static Asset<Texture2D> Texture_Nav_Next;
-		public static Asset<Texture2D> Texture_Nav_SubPage;
-		public static Asset<Texture2D> Texture_Nav_TableOfContents;
-		public static Asset<Texture2D> Texture_Nav_Credits;
-		public static Asset<Texture2D> Texture_Nav_Boss;
-		public static Asset<Texture2D> Texture_Nav_MiniBoss;
-		public static Asset<Texture2D> Texture_Nav_Event;
-		public static Asset<Texture2D> Texture_Nav_Filter;
-
-		public static Asset<Texture2D> Texture_Check_Box;
-		public static Asset<Texture2D> Texture_Check_Check;
-		public static Asset<Texture2D> Texture_Check_X;
-		public static Asset<Texture2D> Texture_Check_Next;
-		public static Asset<Texture2D> Texture_Check_Strike;
-		public static Asset<Texture2D> Texture_Check_Chest;
-		public static Asset<Texture2D> Texture_Check_GoldChest;
-
-		public static Asset<Texture2D> Texture_Credit_DevSlot;
-		public static Asset<Texture2D> Texture_Credit_ModSlot;
-		public static Asset<Texture2D> Texture_Credit_Register;
-
-		public static Asset<Texture2D> Texture_Content_RecordSlot;
-		public static Asset<Texture2D> Texture_Content_PromptSlot;
-		public static Asset<Texture2D> Texture_Content_Cycle;
-		public static Asset<Texture2D> Texture_Content_ToggleHidden;
-		public static Asset<Texture2D> Texture_Content_BossKey;
 
 		// Extra stuff
 		public const string LangLog = "Mods.BossChecklist.Log";
@@ -301,78 +262,37 @@ namespace BossChecklist
 			BossLogVisible = show; // Setting the state makes the UIElements append/remove making them visible/invisible
 		}
 
-		public static Asset<Texture2D> RequestVanillaTexture(string path) => Main.Assets.Request<Texture2D>(path, AssetRequestMode.ImmediateLoad);
-
-		public static Asset<Texture2D> RequestResource(string path) => ModContent.Request<Texture2D>("BossChecklist/Resources/" + path, AssetRequestMode.ImmediateLoad);
-
 		public override void OnInitialize() {
-			Texture_Button_Book = RequestResource("Book_Outline");
-			Texture_Button_Border = RequestResource("Book_Border");
-			Texture_Button_Color = RequestResource("Book_Color");
-			Texture_Button_Faded = RequestResource("Book_Faded");
+			BossLogResources.PreloadLogAssets();
 
-			Texture_Log_BackPanel = RequestResource("LogUI_Back");
-			Texture_Log_Paper = RequestResource("LogUI_Paper");
-			Texture_Log_Tab = RequestResource("LogUI_Tab");
-			Texture_Log_Tab2 = RequestResource("LogUI_InfoTab");
-			Texture_Log_FilterPanel = RequestResource("LogUI_Filter");
-
-			Texture_Nav_Prev = RequestResource("Nav_Prev");
-			Texture_Nav_Next = RequestResource("Nav_Next");
-			Texture_Nav_SubPage = RequestResource("Nav_SubPage_Button");
-			Texture_Nav_TableOfContents = RequestResource("Nav_Contents");
-			Texture_Nav_Credits = RequestResource("Nav_Credits");
-			Texture_Nav_Boss = RequestResource("Nav_Boss");
-			Texture_Nav_MiniBoss = RequestResource("Nav_Miniboss");
-			Texture_Nav_Event = RequestResource("Nav_Event");
-			Texture_Nav_Filter = RequestResource("Nav_Filter");
-
-			Texture_Check_Box = RequestResource("Checks_Box");
-			Texture_Check_Check = RequestResource("Checks_Check");
-			Texture_Check_X = RequestResource("Checks_X");
-			Texture_Check_Next = RequestResource("Checks_Next");
-			Texture_Check_Strike = RequestResource("Checks_Strike");
-			Texture_Check_Chest = RequestResource("Checks_Chest");
-			Texture_Check_GoldChest = RequestResource("Checks_Chest_Gold");
-
-			Texture_Credit_DevSlot = RequestResource("Credits_Panel_Dev");
-			Texture_Credit_ModSlot = RequestResource("Credits_Panel_Mod");
-			Texture_Credit_Register = RequestResource("Credits_Panel_Register");
-
-			Texture_Content_RecordSlot = RequestResource("Extra_RecordSlot");
-			Texture_Content_PromptSlot = RequestResource("Extra_PromptSlot");
-			Texture_Content_Cycle = RequestResource("Extra_CycleRecipe");
-			Texture_Content_ToggleHidden = RequestResource("Nav_Hidden");
-			Texture_Content_BossKey = RequestResource("Extra_Key");
-
-			bosslogbutton = new OpenLogButton(Texture_Button_Book);
+			bosslogbutton = new OpenLogButton(BossLogResources.Button_Book);
 			bosslogbutton.Left.Set(Main.screenWidth - bosslogbutton.Width.Pixels - 190, 0f);
 			bosslogbutton.Top.Pixels = Main.screenHeight - bosslogbutton.Height.Pixels - 8;
 			bosslogbutton.OnLeftClick += (a, b) => ToggleBossLog(true);
 
 			BookArea = new LogPanel();
-			BookArea.Width.Pixels = Texture_Log_BackPanel.Value.Width;
-			BookArea.Height.Pixels = Texture_Log_BackPanel.Value.Height;
+			BookArea.Width.Pixels = BossLogResources.Log_BackPanel.Value.Width;
+			BookArea.Height.Pixels = BossLogResources.Log_BackPanel.Value.Height;
 
-			ToCTab = new LogTab(Texture_Log_Tab, Texture_Nav_TableOfContents) {
+			ToCTab = new LogTab(BossLogResources.Log_Tab, BossLogResources.Nav_TableOfContents) {
 				Id = "TableOfContents"
 			};
 			ToCTab.OnLeftClick += (a, b) => UpdateFilterTabPos(true);
 			ToCTab.OnRightClick += (a, b) => ClearMarkedDowns();
 
-			BossTab = new LogTab(Texture_Log_Tab, Texture_Nav_Boss) {
+			BossTab = new LogTab(BossLogResources.Log_Tab, BossLogResources.Nav_Boss) {
 				Id = "Boss"
 			};
 
-			MiniBossTab = new LogTab(Texture_Log_Tab, Texture_Nav_MiniBoss) {
+			MiniBossTab = new LogTab(BossLogResources.Log_Tab, BossLogResources.Nav_MiniBoss) {
 				Id = "MiniBoss"
 			};
 
-			EventTab = new LogTab(Texture_Log_Tab, Texture_Nav_Event) {
+			EventTab = new LogTab(BossLogResources.Log_Tab, BossLogResources.Nav_Event) {
 				Id = "Event"
 			};
 
-			CreditsTab = new LogTab(Texture_Log_Tab, Texture_Nav_Credits) {
+			CreditsTab = new LogTab(BossLogResources.Log_Tab, BossLogResources.Nav_Credits) {
 				Id = "Credits",
 				Anchor = -2,
 				hoverText = $"{LangLog}.Tabs.Credits" // hoverText will never change, so initialize it
@@ -389,7 +309,7 @@ namespace BossChecklist
 			};
 			PageOneTitle.Top.Pixels = 18;
 
-			PrevPage = new NavigationalButton(Texture_Nav_Prev, true) {
+			PrevPage = new NavigationalButton(BossLogResources.Nav_Prev, true) {
 				Id = "Previous"
 			};
 			PrevPage.Left.Pixels = 8;
@@ -416,17 +336,17 @@ namespace BossChecklist
 
 			pageTwoItemList = new UIList();
 
-			FilterPanel = new FilterIcon(Texture_Log_FilterPanel);
+			FilterPanel = new FilterIcon(BossLogResources.FilterPanel);
 			FilterIcons = new List<FilterIcon>() {
-				new FilterIcon(Texture_Nav_Boss) { Id = "Boss" },
-				new FilterIcon(Texture_Nav_MiniBoss) { Id = "MiniBoss" },
-				new FilterIcon(Texture_Nav_Event) { Id = "Event" },
-				new FilterIcon(RequestVanillaTexture($"Images/Item_{ItemID.EchoMonolith}")) { Id = "Hidden" },
+				new FilterIcon(BossLogResources.Nav_Boss) { Id = "Boss" },
+				new FilterIcon(BossLogResources.Nav_MiniBoss) { Id = "MiniBoss" },
+				new FilterIcon(BossLogResources.Nav_Event) { Id = "Event" },
+				new FilterIcon(BossLogResources.RequestItemTexture(ItemID.EchoMonolith)) { Id = "Hidden" },
 			};
 
 			int offsetY = 0;
 			foreach (FilterIcon icon in FilterIcons) {
-				icon.check = Texture_Check_Check;
+				icon.check = BossLogResources.Check_Check;
 				icon.Top.Pixels = offsetY + 15;
 				icon.Left.Pixels = 25 - (int)(icon.Width.Pixels / 2);
 				FilterPanel.Append(icon);
@@ -434,9 +354,9 @@ namespace BossChecklist
 			}
 
 			Indicators = new List<IndicatorIcon>() {
-				new IndicatorIcon(RequestResource("Indicator_OnlyBosses")) { Id = "OnlyBosses" },
-				new IndicatorIcon(RequestResource("Indicator_Manual")) { Id = "Manual" },
-				new IndicatorIcon(RequestResource("Indicator_Progression")) { Id = "Progression" },
+				new IndicatorIcon(BossLogResources.Indicator_OnlyBosses) { Id = "OnlyBosses" },
+				new IndicatorIcon(BossLogResources.Indicator_Manual) { Id = "Manual" },
+				new IndicatorIcon(BossLogResources.Indicator_Progression) { Id = "Progression" },
 			};
 			IndicatorTab = new IndicatorPanel(Indicators.Count) { Id = "Configurations" };
 
@@ -448,13 +368,13 @@ namespace BossChecklist
 				offsetX += 20;
 			}
 
-			InteractionIcon = new IndicatorIcon(RequestResource("Indicator_Interaction"));
+			InteractionIcon = new IndicatorIcon(BossLogResources.Indicator_Interaction);
 			AltInteractionsTab = new IndicatorPanel(1) { Id = "Interactions" };
 			InteractionIcon.Left.Pixels = (int)(AltInteractionsTab.Width.Pixels / 2 - InteractionIcon.Width.Pixels / 2);
 			InteractionIcon.Top.Pixels = 8;
 			AltInteractionsTab.Append(InteractionIcon);
 
-			NextPage = new NavigationalButton(Texture_Nav_Next, true) {
+			NextPage = new NavigationalButton(BossLogResources.Nav_Next, true) {
 				Id = "Next"
 			};
 			NextPage.Left.Pixels = PageTwo.Width.Pixels - NextPage.Width.Pixels - 12;
@@ -469,26 +389,26 @@ namespace BossChecklist
 			hardmodeList.Height.Pixels = PageOne.Height.Pixels - 136;
 			hardmodeList.PaddingTop = 5;
 
-			recordButton = new SubPageButton(Texture_Nav_SubPage, SubPage.Records);
+			recordButton = new SubPageButton(BossLogResources.Nav_SubPage, SubPage.Records);
 			recordButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 - (int)recordButton.Width.Pixels - 8;
 			recordButton.Top.Pixels = 5;
 			recordButton.OnLeftClick += (a, b) => UpdateSelectedPage(PageNum, SubPage.Records);
 
-			spawnButton = new SubPageButton(Texture_Nav_SubPage, SubPage.SpawnInfo);
+			spawnButton = new SubPageButton(BossLogResources.Nav_SubPage, SubPage.SpawnInfo);
 			spawnButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 + 8;
 			spawnButton.Top.Pixels = 5;
 			spawnButton.OnLeftClick += (a, b) => UpdateSelectedPage(PageNum, SubPage.SpawnInfo);
 
-			lootButton = new SubPageButton(Texture_Nav_SubPage, SubPage.LootAndCollectibles);
+			lootButton = new SubPageButton(BossLogResources.Nav_SubPage, SubPage.LootAndCollectibles);
 			lootButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 - (int)lootButton.Width.Pixels / 2;
-			lootButton.Top.Pixels = 5 + Texture_Nav_SubPage.Value.Height + 10;
+			lootButton.Top.Pixels = 5 + BossLogResources.Nav_SubPage.Value.Height + 10;
 			lootButton.OnLeftClick += (a, b) => UpdateSelectedPage(PageNum, SubPage.LootAndCollectibles);
 
 			// Record Type navigation buttons
 			RecordCategoryButtons = new List<NavigationalButton>();
 			for (int value = 0; value < 4; value++) {
 				RecordCategoryButtons.Add(
-					new NavigationalButton(RequestResource($"Nav_Record_{(SubCategory)value}"), true) {
+					new NavigationalButton(BossLogResources.Nav_Record_Category[value], true) {
 						Record_Anchor = (SubCategory)value,
 						hoverText = $"{LangLog}.Records.Category.{(SubCategory)value}"
 					}
@@ -623,34 +543,34 @@ namespace BossChecklist
 			}
 
 			// ...Bosses
-			FilterIcons[0].check = BossChecklist.BossLogConfig.FilterBosses == BossLogConfiguration.Option_Show ? Texture_Check_Check : Texture_Check_Next;
+			FilterIcons[0].check = BossChecklist.BossLogConfig.FilterBosses == BossLogConfiguration.Option_Show ? BossLogResources.Check_Check : BossLogResources.Check_Next;
 
 			// ...Mini-Bosses
 			if (BossChecklist.BossLogConfig.OnlyShowBossContent) {
-				FilterIcons[1].check = Texture_Check_X;
+				FilterIcons[1].check = BossLogResources.Check_X;
 			}
 			else if (BossChecklist.BossLogConfig.FilterMiniBosses == BossLogConfiguration.Option_Show) {
-				FilterIcons[1].check = Texture_Check_Check;
+				FilterIcons[1].check = BossLogResources.Check_Check;
 			}
 			else if (BossChecklist.BossLogConfig.FilterMiniBosses == BossLogConfiguration.Option_Hide) {
-				FilterIcons[1].check = Texture_Check_X;
+				FilterIcons[1].check = BossLogResources.Check_X;
 			}
 			else {
-				FilterIcons[1].check = Texture_Check_Next;
+				FilterIcons[1].check = BossLogResources.Check_Next;
 			}
 
 			// ...Events
 			if (BossChecklist.BossLogConfig.OnlyShowBossContent) {
-				FilterIcons[2].check = Texture_Check_X;
+				FilterIcons[2].check = BossLogResources.Check_X;
 			}
 			else if (BossChecklist.BossLogConfig.FilterEvents == BossLogConfiguration.Option_Show) {
-				FilterIcons[2].check = Texture_Check_Check;
+				FilterIcons[2].check = BossLogResources.Check_Check;
 			}
 			else if (BossChecklist.BossLogConfig.FilterEvents == BossLogConfiguration.Option_Hide) {
-				FilterIcons[2].check = Texture_Check_X;
+				FilterIcons[2].check = BossLogResources.Check_X;
 			}
 			else {
-				FilterIcons[2].check = Texture_Check_Next;
+				FilterIcons[2].check = BossLogResources.Check_Next;
 			}
 		}
 
@@ -776,9 +696,9 @@ namespace BossChecklist
 
 			// create buttons for the different progression mode options
 			LogUIElement[] backdrops = new LogUIElement[] {
-				new LogUIElement(Texture_Content_PromptSlot.Value),
-				new LogUIElement(Texture_Content_PromptSlot.Value),
-				new LogUIElement(Texture_Content_RecordSlot.Value)
+				new LogUIElement(BossLogResources.Content_PromptSlot.Value),
+				new LogUIElement(BossLogResources.Content_PromptSlot.Value),
+				new LogUIElement(BossLogResources.Content_RecordSlot.Value)
 			};
 
 			backdrops[0].OnLeftClick += (a, b) => SelectProgressionModeState(true);
@@ -789,25 +709,25 @@ namespace BossChecklist
 				backdrop.OnMouseOut += (a, b) => { backdrop.assetColor = Color.White; };
 			}
 
-			backdrops[0].Left.Pixels = PageTwo.Width.Pixels / 2 - Texture_Content_PromptSlot.Value.Width - 10;
+			backdrops[0].Left.Pixels = PageTwo.Width.Pixels / 2 - BossLogResources.Content_PromptSlot.Value.Width - 10;
 			backdrops[1].Left.Pixels = PageTwo.Width.Pixels / 2 + 10;
 			backdrops[2].Left.Pixels = 25;
 
 			backdrops[0].Top.Pixels = 125;
 			backdrops[1].Top.Pixels = 125;
-			backdrops[2].Top.Pixels = 125 + Texture_Content_PromptSlot.Value.Height + 25;
+			backdrops[2].Top.Pixels = 125 + BossLogResources.Content_PromptSlot.Value.Height + 25;
 
 			backdrops[0].hoverText = $"{LangLog}.ProgressionMode.SelectEnable";
 			backdrops[1].hoverText = $"{LangLog}.ProgressionMode.SelectDisable";
 
 			UIImage[] buttons = new UIImage[] {
-				new UIImage(RequestResource($"Extra_ProgressiveOn")),
-				new UIImage(RequestResource($"Extra_ProgressiveOff")),
-				new UIImage(Texture_Check_Box)
+				new UIImage(BossLogResources.Content_ProgressiveOn),
+				new UIImage(BossLogResources.Content_ProgressiveOff),
+				new UIImage(BossLogResources.Check_Box)
 			};
 
-			buttons[0].Left.Pixels = backdrops[0].Width.Pixels / 2 - RequestResource($"Extra_ProgressiveOn").Value.Width / 2;
-			buttons[1].Left.Pixels = backdrops[1].Height.Pixels / 2 - RequestResource($"Extra_ProgressiveOff").Value.Width / 2;
+			buttons[0].Left.Pixels = backdrops[0].Width.Pixels / 2 - buttons[0].Width.Pixels / 2;
+			buttons[1].Left.Pixels = backdrops[1].Height.Pixels / 2 - buttons[1].Width.Pixels / 2;
 			buttons[2].Left.Pixels = 15;
 
 			buttons[0].Top.Pixels = backdrops[0].Height.Pixels / 2 - buttons[0].Height.Pixels / 2;
@@ -823,7 +743,7 @@ namespace BossChecklist
 			textOptions.PaddingLeft = 15;
 			backdrops[2].Append(textOptions);
 
-			PromptCheck = new UIImage(BossChecklist.BossLogConfig.PromptDisabled ? Texture_Check_Check : Texture_Check_X);
+			PromptCheck = new UIImage(BossChecklist.BossLogConfig.PromptDisabled ? BossLogResources.Check_Check : BossLogResources.Check_X);
 
 			for (int i = 0; i < buttons.Length; i++) {
 				if (i == backdrops.Length - 1) {
@@ -898,7 +818,7 @@ namespace BossChecklist
 		private void DisablePromptMessage() {
 			BossChecklist.BossLogConfig.PromptDisabled = !BossChecklist.BossLogConfig.PromptDisabled;
 			PendingConfigChange = true;
-			PromptCheck.SetImage(BossChecklist.BossLogConfig.PromptDisabled ? Texture_Check_Check : Texture_Check_X);
+			PromptCheck.SetImage(BossChecklist.BossLogConfig.PromptDisabled ? BossLogResources.Check_Check : BossLogResources.Check_X);
 		}
 
 		/// <summary>
@@ -1055,7 +975,7 @@ namespace BossChecklist
 
 			if (PageNum >= 0) {
 				if (BossChecklist.BossLogConfig.Debug.AccessInternalNames && GetLogEntryInfo.modSource != "Unknown") {
-					NavigationalButton keyButton = new NavigationalButton(Texture_Content_BossKey, true) {
+					NavigationalButton keyButton = new NavigationalButton(BossLogResources.Content_BossKey, true) {
 						Id = "CopyKey",
 						hoverText = $"{Language.GetTextValue($"{LangLog}.EntryPage.CopyKey")}:\n{GetLogEntryInfo.Key}"
 					};
@@ -1299,12 +1219,12 @@ namespace BossChecklist
 
 			// Developers Display
 			UIList creditList = new UIList();
-			creditList.Width.Pixels = Texture_Credit_DevSlot.Value.Width;
-			creditList.Height.Pixels = Texture_Credit_DevSlot.Value.Height * 4 + 20;
-			creditList.Left.Pixels = (int)(PageOne.Width.Pixels / 2 - Texture_Credit_DevSlot.Value.Width / 2) - 8;
+			creditList.Width.Pixels = BossLogResources.Credit_DevSlot.Value.Width;
+			creditList.Height.Pixels = BossLogResources.Credit_DevSlot.Value.Height * 4 + 20;
+			creditList.Left.Pixels = (int)(PageOne.Width.Pixels / 2 - BossLogResources.Credit_DevSlot.Value.Width / 2) - 8;
 			creditList.Top.Pixels = 60;
 			foreach (KeyValuePair<string, string> user in contributors) {
-				creditList.Add(new ContributorCredit(Texture_Credit_DevSlot, RequestResource($"Credits_{user.Key}"), user.Key, user.Value));
+				creditList.Add(new ContributorCredit(BossLogResources.Credit_DevSlot, BossLogResources.Credit_Devs[contributors.Keys.ToList().IndexOf(user.Key)], user.Key, user.Value));
 			}
 			PageOne.Append(creditList);
 
@@ -1318,25 +1238,25 @@ namespace BossChecklist
 
 			// Registered Mods Display
 			pageTwoItemList.Clear();
-			pageTwoItemList.Width.Pixels = Texture_Credit_ModSlot.Value.Width;
-			pageTwoItemList.Height.Pixels = Texture_Credit_ModSlot.Value.Height * 3 + 15;
-			pageTwoItemList.Left.Pixels = (int)(PageTwo.Width.Pixels / 2 - Texture_Credit_ModSlot.Value.Width / 2);
+			pageTwoItemList.Width.Pixels = BossLogResources.Credit_ModSlot.Value.Width;
+			pageTwoItemList.Height.Pixels = BossLogResources.Credit_ModSlot.Value.Height * 3 + 15;
+			pageTwoItemList.Left.Pixels = (int)(PageTwo.Width.Pixels / 2 - BossLogResources.Credit_ModSlot.Value.Width / 2);
 			pageTwoItemList.Top.Pixels = 85;
 			if (BossChecklist.bossTracker.RegisteredMods.Count > 0) {
 				foreach (string mod in BossChecklist.bossTracker.RegisteredMods.Keys) {
-					pageTwoItemList.Add(new ContributorCredit(Texture_Credit_ModSlot, mod));
+					pageTwoItemList.Add(new ContributorCredit(BossLogResources.Credit_ModSlot, mod));
 				}
 			}
 			else {
 				// if none of the loaded mods have registered an entry, convey this to the user
 				string NoModsTitle = Language.GetTextValue($"{LangLog}.Credits.ModsEmpty");
-				pageTwoItemList.Add(new ContributorCredit(RequestResource("Credits_Panel_NoMods"), NoModsTitle, "") { Id = "NoMods" });
+				pageTwoItemList.Add(new ContributorCredit(BossLogResources.Credit_NoMods, NoModsTitle, "") { Id = "NoMods" });
 			}
 
 			// add a slot that tells mod developers they can register their own mods
 			string RegisterTitle = Language.GetTextValue($"{LangLog}.Credits.Register");
 			string RegisterDescription = Language.GetTextValue($"{LangLog}.Credits.Learn");
-			pageTwoItemList.Add(new ContributorCredit(Texture_Credit_Register, RegisterTitle, RegisterDescription) { Id = "Register" });
+			pageTwoItemList.Add(new ContributorCredit(BossLogResources.Credit_Register, RegisterTitle, RegisterDescription) { Id = "Register" });
 			PageTwo.Append(pageTwoItemList);
 
 			scrollTwo.SetView(10f, 1000f);
@@ -1364,12 +1284,12 @@ namespace BossChecklist
 			// The entry also must be fully supported to have these buttons created
 
 			if (GetLogEntryInfo.type != EntryType.Boss) {
-				RecordDisplaySlot slot = new RecordDisplaySlot(Texture_Content_RecordSlot);
+				RecordDisplaySlot slot = new RecordDisplaySlot(BossLogResources.Content_RecordSlot);
 				if (GetLogEntryInfo.type == EntryType.MiniBoss) {
 					slot.title = Language.GetTextValue("Mods.BossChecklist.Log.Records.Kills");
 					slot.value = GetModPlayer.MiniBossKills.ContainsKey(GetLogEntryInfo.Key) ? GetModPlayer.MiniBossKills[GetLogEntryInfo.Key].ToString() : "0";
 				}
-				slot.Left.Pixels = (int)(PageTwo.Width.Pixels / 2 - Texture_Content_RecordSlot.Value.Width / 2);
+				slot.Left.Pixels = (int)(PageTwo.Width.Pixels / 2 - BossLogResources.Content_RecordSlot.Value.Width / 2);
 				slot.Top.Pixels = 35 + 75;
 				PageTwo.Append(slot);
 
@@ -1423,13 +1343,13 @@ namespace BossChecklist
 
 				// create 4 slots for each stat category value
 				for (int i = 0; i < 4; i++) {
-					RecordDisplaySlot slot = new RecordDisplaySlot(Texture_Content_RecordSlot, RecordSubCategory, i, recordIndex);
-					slot.Left.Pixels = (int)(PageTwo.Width.Pixels / 2 - Texture_Content_RecordSlot.Value.Width / 2);
+					RecordDisplaySlot slot = new RecordDisplaySlot(BossLogResources.Content_RecordSlot, RecordSubCategory, i, recordIndex);
+					slot.Left.Pixels = (int)(PageTwo.Width.Pixels / 2 - BossLogResources.Content_RecordSlot.Value.Width / 2);
 					slot.Top.Pixels = (int)(35 + (75 * (i + 1)));
 					PageTwo.Append(slot);
 
 					if (i == 0) {
-						UIImage categoryIcon = new UIImage(RequestResource($"Nav_Record_{RecordSubCategory}"));
+						UIImage categoryIcon = new UIImage(BossLogResources.Nav_Record_Category[(int)RecordSubCategory]);
 						categoryIcon.Left.Pixels = 15;
 						categoryIcon.Top.Pixels = (int)(slot.Height.Pixels / 2 - categoryIcon.Height.Pixels / 2);
 						categoryIcon.OnRightClick += (a, b) => ResetStats();
@@ -1485,7 +1405,7 @@ namespace BossChecklist
 					else if (i >= 2) {
 						NavigationalButton trophy = null;
 						if (RecordSubCategory == SubCategory.WorldRecord) {
-							trophy = new NavigationalButton(RequestVanillaTexture($"Images/Item_{ItemID.GolfTrophyGold}"), false) {
+							trophy = new NavigationalButton(BossLogResources.RequestItemTexture(ItemID.GolfTrophyGold), false) {
 								hoverText = i == 2 ? GetWorldRecords.ListDurationRecordHolders() : GetWorldRecords.ListHitsTakenRecordHolders()
 							};
 						}
@@ -1503,7 +1423,7 @@ namespace BossChecklist
 							string compValueString = i == 2 ? PersonalRecords.TimeConversion(compValue) : PersonalRecords.HitCount(compValue);
 							string diffValue = i == 2 ? PersonalRecords.TimeConversionDiff(recordValue, compValue, out Color color) : PersonalRecords.HitCountDiff(recordValue, compValue, out color);
 							string path = $"{LangLog}.Records.Category.{CompareState}";
-							trophy = new NavigationalButton(RequestVanillaTexture($"Images/Item_{ItemID.GolfTrophySilver}"), false) {
+							trophy = new NavigationalButton(BossLogResources.RequestItemTexture(ItemID.GolfTrophySilver), false) {
 								Id = "CompareStat",
 								hoverText = $"[c/{Color.Wheat.Hex3()}:{Language.GetTextValue(path)}: {compValueString}]{(diffValue != "" ? $"\n{diffValue}" : "")}",
 								hoverTextColor = color
@@ -1513,7 +1433,7 @@ namespace BossChecklist
 							string compValueString = i == 2 ? PersonalRecords.TimeConversion(GetPlayerRecords.durationPrevBest) : PersonalRecords.HitCount(GetPlayerRecords.hitsTakenPrevBest);
 							string diffValue = i == 2 ? PersonalRecords.TimeConversionDiff(GetPlayerRecords.durationBest, GetPlayerRecords.durationPrevBest, out Color color) : PersonalRecords.HitCountDiff(GetPlayerRecords.hitsTakenBest, GetPlayerRecords.hitsTakenPrevBest, out color);
 							string path = $"{LangLog}.Records.PreviousBest";
-							trophy = new NavigationalButton(RequestVanillaTexture($"Images/Item_{ItemID.GolfTrophyBronze}"), false) {
+							trophy = new NavigationalButton(BossLogResources.RequestItemTexture(ItemID.GolfTrophyBronze), false) {
 								hoverText = $"[c/{Color.Wheat.Hex3()}:{Language.GetTextValue(path)}: {compValueString}]{(diffValue != "" ? $"\n{diffValue}" : "")}",
 								hoverTextColor = color
 							};
@@ -1525,7 +1445,7 @@ namespace BossChecklist
 							slot.Append(trophy);
 
 							if (trophy.Id == "CompareStat") {
-								UIImage compareIcon = new UIImage(RequestResource($"Nav_Record_{CompareState}"));
+								UIImage compareIcon = new UIImage(BossLogResources.Nav_Record_Category[(int)CompareState]);
 								compareIcon.Left.Pixels = -(int)(compareIcon.Width.Pixels / 3);
 								compareIcon.Top.Pixels = (int)(trophy.Height.Pixels - compareIcon.Height.Pixels * 2 / 3);
 								trophy.Append(compareIcon);
@@ -1594,7 +1514,7 @@ namespace BossChecklist
 			// if more than one item is used for summoning, append navigational button to cycle through the items
 			// a previous item button will appear if it is not the first item listed
 			if (SpawnItemSelected > 0) {
-				NavigationalButton PrevItem = new NavigationalButton(Texture_Nav_Prev, true) {
+				NavigationalButton PrevItem = new NavigationalButton(BossLogResources.Nav_Prev, true) {
 					Id = "PrevItem"
 				};
 				PrevItem.Left.Pixels = spawnItemSlot.Left.Pixels - PrevItem.Width.Pixels - 6;
@@ -1604,7 +1524,7 @@ namespace BossChecklist
 			}
 			// a next button will appear if it is not the last item listed
 			if (SpawnItemSelected < GetLogEntryInfo.spawnItem.Count - 1) {
-				NavigationalButton NextItem = new NavigationalButton(Texture_Nav_Next, true) {
+				NavigationalButton NextItem = new NavigationalButton(BossLogResources.Nav_Next, true) {
 					Id = "NextItem"
 				};
 				NextItem.Left.Pixels = spawnItemSlot.Left.Pixels + spawnItemSlot.Width.Pixels + 6;
@@ -1672,12 +1592,12 @@ namespace BossChecklist
 
 				// if more than one recipe exists for the selected item, append a button that cycles through all possible recipes
 				if (TotalRecipes > 1) {
-					NavigationalButton CycleItem = new NavigationalButton(Texture_Content_Cycle, true) {
+					NavigationalButton CycleItem = new NavigationalButton(BossLogResources.Content_Cycle, true) {
 						Id = "CycleItem_" + TotalRecipes,
 						hoverText = $"{LangLog}.SpawnInfo.CycleRecipe"
 					};
-					CycleItem.Left.Pixels = 20 + (int)(TextureAssets.InventoryBack9.Width() * 0.85f / 2 - Texture_Content_Cycle.Value.Width / 2);
-					CycleItem.Top.Pixels = 240 + (int)(TextureAssets.InventoryBack9.Height() * 0.85f / 2 - Texture_Content_Cycle.Value.Height / 2);
+					CycleItem.Left.Pixels = 20 + (int)(TextureAssets.InventoryBack9.Width() * 0.85f / 2 - BossLogResources.Content_Cycle.Value.Width / 2);
+					CycleItem.Top.Pixels = 240 + (int)(TextureAssets.InventoryBack9.Height() * 0.85f / 2 - BossLogResources.Content_Cycle.Value.Height / 2);
 					CycleItem.OnLeftClick += ChangeSpawnItem;
 					PageTwo.Append(CycleItem);
 				}
