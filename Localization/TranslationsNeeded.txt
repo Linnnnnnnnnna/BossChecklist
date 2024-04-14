@@ -4,6 +4,6 @@ it-IT, 0/313, 0%, missing 313
 fr-FR, 0/313, 0%, missing 313
 es-ES, 80/313, 26%, missing 233
 ru-RU, 286/313, 91%, missing 27
-zh-Hans, 311/313, 99%, missing 2
+zh-Hans, 313/313, 100%, missing 0
 pt-BR, 61/313, 19%, missing 252
 pl-PL, 0/313, 0%, missing 313

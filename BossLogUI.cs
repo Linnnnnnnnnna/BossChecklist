@@ -525,52 +525,11 @@ namespace BossChecklist
 				FilterPanel.Top.Pixels = ToCTab.Top.Pixels;
 				ToCTab.Left.Pixels = BookArea.Left.Pixels - 20 - FilterPanel.Width.Pixels;
 				FilterPanel.Left.Pixels = ToCTab.Left.Pixels + ToCTab.Width.Pixels;
-				UpdateFilterCheckAndTooltip(); // Update filter display state when the filter panel is opened
+				FilterIcons.ForEach(x => x.UpdateFilterIcon()); // Update filter display state when the filter panel is opened
 			}
 			else {
 				ToCTab.Left.Pixels = BookArea.Left.Pixels - 20;
 				FilterPanel.Top.Pixels = -5000; // throw offscreen
-			}
-		}
-
-		/// <summary>
-		/// The logic behind the filters changing checkmarks and hoverTexts where needed.
-		/// </summary>
-		public void UpdateFilterCheckAndTooltip() {
-			// Update all hoverTexts
-			foreach(FilterIcon icon in FilterIcons) {
-				icon.hoverText = icon.UpdateHoverText();
-			}
-
-			// ...Bosses
-			FilterIcons[0].check = BossChecklist.BossLogConfig.FilterBosses == BossLogConfiguration.Option_Show ? BossLogResources.Check_Check : BossLogResources.Check_Next;
-
-			// ...Mini-Bosses
-			if (BossChecklist.BossLogConfig.OnlyShowBossContent) {
-				FilterIcons[1].check = BossLogResources.Check_X;
-			}
-			else if (BossChecklist.BossLogConfig.FilterMiniBosses == BossLogConfiguration.Option_Show) {
-				FilterIcons[1].check = BossLogResources.Check_Check;
-			}
-			else if (BossChecklist.BossLogConfig.FilterMiniBosses == BossLogConfiguration.Option_Hide) {
-				FilterIcons[1].check = BossLogResources.Check_X;
-			}
-			else {
-				FilterIcons[1].check = BossLogResources.Check_Next;
-			}
-
-			// ...Events
-			if (BossChecklist.BossLogConfig.OnlyShowBossContent) {
-				FilterIcons[2].check = BossLogResources.Check_X;
-			}
-			else if (BossChecklist.BossLogConfig.FilterEvents == BossLogConfiguration.Option_Show) {
-				FilterIcons[2].check = BossLogResources.Check_Check;
-			}
-			else if (BossChecklist.BossLogConfig.FilterEvents == BossLogConfiguration.Option_Hide) {
-				FilterIcons[2].check = BossLogResources.Check_X;
-			}
-			else {
-				FilterIcons[2].check = BossLogResources.Check_Next;
 			}
 		}
 

@@ -356,25 +356,33 @@ namespace BossChecklist.UIElements
 					"Boss" => BossChecklist.BossLogConfig.FilterBosses.Replace(" ", ""),
 					"MiniBoss" => BossChecklist.BossLogConfig.FilterMiniBosses.Replace(" ", ""),
 					"Event" => BossChecklist.BossLogConfig.FilterEvents.Replace(" ", ""),
-					_ => BossLogConfiguration.Option_Show
+					_ => ""
 				};
 			}
 
-			public string UpdateHoverText() {
+			public void UpdateFilterIcon() {
+				check = Id switch {
+					"Boss" => BossLogResources.FilterToIcon[BossChecklist.BossLogConfig.FilterBosses],
+					"MiniBoss" => BossChecklist.BossLogConfig.OnlyShowBossContent ? BossLogResources.Check_X : BossLogResources.FilterToIcon[BossChecklist.BossLogConfig.FilterMiniBosses],
+					"Event" => BossChecklist.BossLogConfig.OnlyShowBossContent ? BossLogResources.Check_X : BossLogResources.FilterToIcon[BossChecklist.BossLogConfig.FilterEvents],
+					_ => null
+				};
+
+				// update the hover tooltips
 				string LangFilter = "Mods.BossChecklist.Log.TableOfContents.Filter";
 				string LangCommon = "Mods.BossChecklist.Log.Common";
 
 				if (BossChecklist.BossLogConfig.OnlyShowBossContent && (Id == "MiniBoss" || Id == "Event"))
-					return $"{LangFilter}.Disabled";
+					hoverText = $"{LangFilter}.Disabled";
 
-				return Id switch {
-					"Marked" => "", // TODO: Marked hovertext
+				hoverText = Id switch {
+					"Boss" or "MiniBoss" or "Event" => Language.GetTextValue($"{LangFilter}.{GetConfigValue()}", Language.GetTextValue($"{LangCommon}.{Id}Plural")),
 					"Hidden" => $"{LangFilter}.ToggleHidden" + (LogUI.HiddenEntriesMode ? "Close" : "Open"),
-					_ => Language.GetTextValue($"{LangFilter}.{GetConfigValue().Replace(" ", "")}", Language.GetTextValue($"{LangCommon}.{Id}Plural"))
+					_ => ""
 				};
 			}
 
-			private string Cycle(string value, bool boss = false) {
+			private string CycleFilterState(string value, bool boss = false) {
 				return value switch {
 					BossLogConfiguration.Option_Show => BossLogConfiguration.Option_HideWhenCompleted,
 					BossLogConfiguration.Option_HideWhenCompleted => boss ? BossLogConfiguration.Option_Show : BossLogConfiguration.Option_Hide,
@@ -386,28 +394,28 @@ namespace BossChecklist.UIElements
 			public override void LeftClick(UIMouseEvent evt) {
 				base.LeftClick(evt);
 
+				if (Id is null)
+					return; // don't do anything if the panel is clicked
+
 				string ConfigHoverText = "";
 				if (Id == "Boss") {
-					BossChecklist.BossLogConfig.FilterBosses = ConfigHoverText = Cycle(BossChecklist.BossLogConfig.FilterBosses, true);
+					BossChecklist.BossLogConfig.FilterBosses = ConfigHoverText = CycleFilterState(BossChecklist.BossLogConfig.FilterBosses, true);
 				}
 				else if (Id == "MiniBoss" && !BossChecklist.BossLogConfig.OnlyShowBossContent) {
-					BossChecklist.BossLogConfig.FilterMiniBosses = ConfigHoverText = Cycle(BossChecklist.BossLogConfig.FilterMiniBosses);
+					BossChecklist.BossLogConfig.FilterMiniBosses = ConfigHoverText = CycleFilterState(BossChecklist.BossLogConfig.FilterMiniBosses);
 				}
 				else if (Id == "Event" && !BossChecklist.BossLogConfig.OnlyShowBossContent) {
-					BossChecklist.BossLogConfig.FilterEvents = ConfigHoverText = Cycle(BossChecklist.BossLogConfig.FilterEvents);
+					BossChecklist.BossLogConfig.FilterEvents = ConfigHoverText = CycleFilterState(BossChecklist.BossLogConfig.FilterEvents);
 				}
 				else if (Id == "Hidden") {
 					LogUI.HiddenEntriesMode = !LogUI.HiddenEntriesMode;
-				}
-				else if (Id == "Marked") {
-					// TODO: list only marked entries
 				}
 
 				if (!string.IsNullOrEmpty(ConfigHoverText))
 					BossLogUI.PendingConfigChange = true;
 
-				LogUI.UpdateFilterCheckAndTooltip(); // Update filter display state when clicked
-				LogUI.RefreshPageContent();
+				UpdateFilterIcon();
+				LogUI.RefreshPageContent(); // updates checklist based on filters modified
 			}
 
 			public override void RightClick(UIMouseEvent evt) {
@@ -427,7 +435,7 @@ namespace BossChecklist.UIElements
 					pos = inner.Center() - new Vector2(icon.Value.Width / 2 * scale, icon.Value.Height / 2 * scale);
 				}
 				spriteBatch.Draw(icon.Value, pos, icon.Value.Bounds, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 1f);
-				if (check != null)
+				if (check is not null)
 					spriteBatch.Draw(check.Value, new Vector2(inner.X + inner.Width - 10, inner.Y + inner.Height - 15), Color.White);
 
 				base.Draw(spriteBatch);
