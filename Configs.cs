@@ -336,6 +336,8 @@ namespace BossChecklist
 		[DefaultValue(false)]
 		public bool ScalesOnMap { get; set; }
 
+		internal bool ItemMapDrawingEnabled => TreasureBagsOnMap || FragmentsOnMap || ScalesOnMap;
+
 		[Header("BossRadar")]
 
 		[DefaultValue(true)]

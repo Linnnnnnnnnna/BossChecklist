@@ -12,6 +12,9 @@ namespace BossChecklist
 {
 	public class MapHelper : ModMapLayer {
 		public override void Draw(ref MapOverlayDrawContext context, ref string text) {
+			if (BossChecklist.FeatureConfig.ItemMapDrawingEnabled is false)
+				return; // loop through items only if at least one of the configs is enabled
+
 			foreach (Item item in Main.item) {
 				if (!item.active || !IsWhitelistedItem(item.type))
 					continue; // do not draw items that are inacive or not whitelisted
