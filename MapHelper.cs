@@ -12,7 +12,7 @@ namespace BossChecklist
 {
 	public class MapHelper : ModMapLayer {
 		public override void Draw(ref MapOverlayDrawContext context, ref string text) {
-			if (BossChecklist.FeatureConfig.ItemMapDrawingEnabled is false)
+			if (BossChecklist.FeatureConfig.ItemMapDrawingEnabled is false || Main.item is null)
 				return; // loop through items only if at least one of the configs is enabled
 
 			foreach (Item item in Main.item) {
