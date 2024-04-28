@@ -19,6 +19,9 @@ namespace BossChecklist
 				if (!item.active || !IsWhitelistedItem(item.type))
 					continue; // do not draw items that are inacive or not whitelisted
 
+				if (!TextureAssets.Item[item.type].IsLoaded)
+					Main.instance.LoadItem(item.type); // Items SHOULD already be loaded, but in case it isn't have a backup
+
 				if (context.Draw(TextureAssets.Item[item.type].Value, item.VisualPosition / 16, Color.White, new SpriteFrame(1, 1, 0, 0), 1f, 1.2f, Alignment.Center).IsMouseOver)
 					text = item.HoverName; // Display the item's hover name when hovering over the icon
 			}
