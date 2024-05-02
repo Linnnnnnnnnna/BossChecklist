@@ -460,7 +460,7 @@ namespace BossChecklist
 				int headOffset = 0;
 				foreach (Asset<Texture2D> headIcon in entry.headIconTextures()) {
 					Texture2D headShown = isNotProgressed ? TextureAssets.NpcHead[0].Value : headIcon.Value;
-					spriteBatch.Draw(headShown, new Vector2(Main.mouseX + 15 + headOffset, Main.mouseY + 15), entry.IsUpNext ? Color.Black : Color.White);
+					spriteBatch.Draw(headShown, new Vector2(Main.mouseX + 15 + headOffset, Main.mouseY + 15), MaskBoss(entry));
 					headOffset += headShown.Width + 2;
 				}
 			}
@@ -1738,7 +1738,7 @@ namespace BossChecklist
 			if (!BossChecklist.BossLogConfig.ProgressiveChecklist)
 				return Color.White;
 
-			return !entry.IsAutoDownedOrMarked || entry.IsUpNext ? Color.Black : Color.White;
+			return entry.IsUpNext ? Color.Black : Color.White;
 		}
 
 		public static void OverrideForGroups(Recipe recipe, Item item) {
