@@ -369,7 +369,7 @@ namespace BossChecklist
 			}
 
 			InteractionIcon = new IndicatorIcon(BossLogResources.Indicator_Interaction);
-			AltInteractionsTab = new IndicatorPanel(1) { Id = "Interactions", hoverText = GenerateInteractionHoverText() };
+			AltInteractionsTab = new IndicatorPanel(1) { Id = "Interactions" };
 			InteractionIcon.Left.Pixels = (int)(AltInteractionsTab.Width.Pixels / 2 - InteractionIcon.Width.Pixels / 2);
 			InteractionIcon.Top.Pixels = 8;
 			AltInteractionsTab.Append(InteractionIcon);
@@ -487,6 +487,7 @@ namespace BossChecklist
 			IndicatorTab.Top.Pixels = PageTwo.Top.Pixels - IndicatorTab.Height.Pixels - 6;
 			AltInteractionsTab.Left.Pixels = IndicatorTab.Left.Pixels - AltInteractionsTab.Width.Pixels - 2;
 			AltInteractionsTab.Top.Pixels = PageTwo.Top.Pixels - AltInteractionsTab.Height.Pixels - 6;
+			AltInteractionsTab.hoverText = GenerateInteractionHoverText();
 			UpdateFilterTabPos(false); // Update filter tab visibility
 			CreditsTab.Left.Pixels = BookArea.Left.Pixels + BookArea.Width.Pixels - 12;
 			CreditsTab.Top.Pixels = BookArea.Top.Pixels + offsetY + (BossTab.Height.Pixels * 4);
