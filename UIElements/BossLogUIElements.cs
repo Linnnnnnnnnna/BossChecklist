@@ -1,7 +1,6 @@
 ﻿using BossChecklist.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using ReLogic.Graphics;
 using ReLogic.OS;
@@ -225,9 +224,9 @@ namespace BossChecklist.UIElements
 					LogUI.PendingPageNum = Anchor.Value;
 
 				if (Record_Anchor.HasValue) {
-					BossLogUI.RecordSubCategory = Record_Anchor.Value;
-					if (Record_Anchor.Value == BossLogUI.CompareState)
-						BossLogUI.CompareState = SubCategory.None;
+					LogUI.RecordSubCategory = Record_Anchor.Value;
+					if (Record_Anchor.Value == LogUI.CompareState)
+						LogUI.CompareState = SubCategory.None;
 					LogUI.RefreshPageContent();
 				}
 
@@ -242,8 +241,8 @@ namespace BossChecklist.UIElements
 
 			public override void RightClick(UIMouseEvent evt) {
 				base.RightClick(evt);
-				if (Record_Anchor.HasValue && Record_Anchor.Value != BossLogUI.RecordSubCategory) {
-					BossLogUI.CompareState = BossLogUI.CompareState == Record_Anchor.Value ? SubCategory.None : Record_Anchor.Value;
+				if (Record_Anchor.HasValue && Record_Anchor.Value != LogUI.RecordSubCategory) {
+					LogUI.CompareState = LogUI.CompareState == Record_Anchor.Value ? SubCategory.None : Record_Anchor.Value;
 					LogUI.RefreshPageContent();
 				}
 			}
@@ -257,7 +256,7 @@ namespace BossChecklist.UIElements
 
 			public override void Draw(SpriteBatch spriteBatch) {
 				if (Record_Anchor.HasValue) {
-					spriteBatch.Draw(texture.Value, GetInnerDimensions().ToRectangle(), BossLogUI.RecordSubCategory == Record_Anchor.Value ? iconColor : HoverColor);
+					spriteBatch.Draw(texture.Value, GetInnerDimensions().ToRectangle(), LogUI.RecordSubCategory == Record_Anchor.Value ? iconColor : HoverColor);
 				}
 				else {
 					spriteBatch.Draw(texture.Value, GetInnerDimensions().ToRectangle(), hoverButton ? HoverColor : iconColor);
@@ -275,6 +274,51 @@ namespace BossChecklist.UIElements
 			public IndicatorPanel(int iconCount) {
 				Width.Pixels = (10 * 2) + ((18 + 2) * iconCount - 2); // indicator end panel width = 10; indicator back width = 18;
 				Height.Pixels = 26; // indicator panel height = 26;
+			}
+
+			public override void RightClick(UIMouseEvent evt) {
+				if (Id != "Interactions")
+					return;
+
+				if (!BossChecklist.BossLogConfig.Debug.EnabledResetOptions || !BossLogUI.AltKeyIsDown)
+					return; // This button only covers the reset data options
+
+				if (LogUI.PageNum == BossLogUI.Page_TableOfContents) {
+					if (LogUI.HiddenEntriesMode) {
+						// Set all entries to NOT hidden
+						if (WorldAssist.HiddenEntries.Count > 0) {
+							WorldAssist.HiddenEntries.Clear();
+							BossUISystem.Instance.bossChecklistUI.UpdateCheckboxes();
+							Networking.RequestHiddenEntryUpdate();
+							LogUI.RefreshPageContent();
+						}
+					}
+					else {
+						// Unmark all entries
+						if (WorldAssist.MarkedEntries.Count > 0) {
+							WorldAssist.MarkedEntries.Clear();
+							Networking.RequestMarkedEntryUpdate();
+							LogUI.RefreshPageContent();
+						}
+					}
+				}
+				else if (LogUI.PageNum >= 0 && BossChecklist.BossLogConfig.Debug.EnabledResetOptions) {
+					if (LogUI.SelectedSubPage == SubPage.Records && LogUI.GetLogEntryInfo.type == EntryType.Boss) {
+						if (LogUI.GetPlayerRecords is not null) {
+							LogUI.GetPlayerRecords.ResetStats(LogUI.RecordSubCategory);
+							LogUI.RefreshPageContent();
+						}
+					}
+					else if (LogUI.SelectedSubPage == SubPage.LootAndCollectibles) {
+						// Remove all items from the obtained list
+						foreach (int item in LogUI.GetLogEntryInfo.lootItemTypes) {
+							LogUI.GetModPlayer.BossItemsCollected.RemoveAll(x => x.Type == item);
+						}
+						foreach (int item in LogUI.GetLogEntryInfo.collectibles.Keys.ToList()) {
+							LogUI.GetModPlayer.BossItemsCollected.RemoveAll(x => x.Type == item);
+						}
+					}
+				}
 			}
 
 			public override void Draw(SpriteBatch spriteBatch) {
@@ -418,12 +462,6 @@ namespace BossChecklist.UIElements
 				LogUI.RefreshPageContent(); // updates checklist based on filters modified
 			}
 
-			public override void RightClick(UIMouseEvent evt) {
-				base.RightClick(evt);
-				if (Id == "Hidden")
-					LogUI.ClearHiddenList();
-			}
-
 			public override void Draw(SpriteBatch spriteBatch) {
 				Rectangle inner = GetInnerDimensions().ToRectangle();
 				Color color = Color.White;
@@ -459,7 +497,7 @@ namespace BossChecklist.UIElements
 				base.DrawSelf(spriteBatch);
 
 				Rectangle inner = GetInnerDimensions().ToRectangle();
-				if (subPageType == BossLogUI.SelectedSubPage) {
+				if (subPageType == BossUISystem.Instance.BossLog.SelectedSubPage) {
 					selectionBorder ??= BossLogResources.RequestResource("Nav_SubPage_Border");
 					spriteBatch.Draw(selectionBorder.Value, inner, Color.White); // draw a border around the selected subpage
 				}
@@ -493,10 +531,10 @@ namespace BossChecklist.UIElements
 			}
 
 			public override void RightClick(UIMouseEvent evt) {
-				if (!BossChecklist.BossLogConfig.Debug.EnabledResetOptions || BossLogUI.SelectedSubPage != SubPage.LootAndCollectibles)
+				if (!BossChecklist.BossLogConfig.Debug.EnabledResetOptions || LogUI.SelectedSubPage != SubPage.LootAndCollectibles)
 					return; // do not do anything if the loot page isn't the active
 
-				if (!Main.keyState.IsKeyDown(Keys.LeftAlt) && !Main.keyState.IsKeyDown(Keys.RightAlt))
+				if (!BossLogUI.AltKeyIsDown)
 					return; // player must be holding alt to remove any items
 
 				LogUI.GetLogEntryInfo.lootItemTypes.ForEach(item => LogUI.GetModPlayer.BossItemsCollected.RemoveAll(x => x.Type == item));
@@ -809,7 +847,7 @@ namespace BossChecklist.UIElements
 						Utils.DrawBorderString(spriteBatch, entry.ModDisplayName, pos, new Color(150, 150, 255));
 					}
 					else if (Id == "PageTwo" && entry.modSource != "Unknown") {
-						if (BossLogUI.SelectedSubPage == SubPage.Records) {
+						if (LogUI.SelectedSubPage == SubPage.Records) {
 							if (entry.type == EntryType.Boss) {
 								// Boss Records SubPage
 							}
@@ -934,10 +972,10 @@ namespace BossChecklist.UIElements
 								}
 							}
 						}
-						else if (BossLogUI.SelectedSubPage == SubPage.SpawnInfo) {
+						else if (LogUI.SelectedSubPage == SubPage.SpawnInfo) {
 							// Spawn Item Subpage
 						}
-						else if (BossLogUI.SelectedSubPage == SubPage.LootAndCollectibles) {
+						else if (LogUI.SelectedSubPage == SubPage.LootAndCollectibles) {
 							// Loot Table Subpage
 						}
 					}

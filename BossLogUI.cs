@@ -71,12 +71,13 @@ namespace BossChecklist
 		public PersonalRecords GetPlayerRecords => GetLogEntryInfo.IsRecordIndexed(out int recordIndex) ? GetModPlayer.RecordsForWorld?[recordIndex] : null;
 		public WorldRecord GetWorldRecords => GetLogEntryInfo.IsRecordIndexed(out int recordIndex) ? WorldAssist.WorldRecordsForWorld[recordIndex] : null;
 		public PlayerAssist GetModPlayer => Main.LocalPlayer.GetModPlayer<PlayerAssist>();
+		public static bool AltKeyIsDown => Main.keyState.IsKeyDown(Keys.LeftAlt) || Main.keyState.IsKeyDown(Keys.Right);
 
 		// Navigation
 		public NavigationalButton NextPage;
 		public NavigationalButton PrevPage;
 
-		public static SubPage SelectedSubPage = SubPage.Records;
+		public SubPage SelectedSubPage = SubPage.Records;
 		public SubPageButton recordButton;
 		public SubPageButton spawnButton;
 		public SubPageButton lootButton;
@@ -140,8 +141,8 @@ namespace BossChecklist
 		};
 
 		// Record page related
-		public static SubCategory RecordSubCategory = SubCategory.PreviousAttempt;
-		public static SubCategory CompareState = SubCategory.None; // Compare record values to one another
+		public SubCategory RecordSubCategory = SubCategory.PreviousAttempt;
+		public SubCategory CompareState = SubCategory.None; // Compare record values to one another
 		public List<NavigationalButton> RecordCategoryButtons;
 
 		// Spawn Info page related
@@ -278,7 +279,6 @@ namespace BossChecklist
 				Id = "TableOfContents"
 			};
 			ToCTab.OnLeftClick += (a, b) => UpdateFilterTabPos(true);
-			ToCTab.OnRightClick += (a, b) => ClearMarkedDowns();
 
 			BossTab = new LogTab(BossLogResources.Log_Tab, BossLogResources.Nav_Boss) {
 				Id = "Boss"
@@ -369,7 +369,7 @@ namespace BossChecklist
 			}
 
 			InteractionIcon = new IndicatorIcon(BossLogResources.Indicator_Interaction);
-			AltInteractionsTab = new IndicatorPanel(1) { Id = "Interactions" };
+			AltInteractionsTab = new IndicatorPanel(1) { Id = "Interactions", hoverText = GenerateInteractionHoverText() };
 			InteractionIcon.Left.Pixels = (int)(AltInteractionsTab.Width.Pixels / 2 - InteractionIcon.Width.Pixels / 2);
 			InteractionIcon.Top.Pixels = 8;
 			AltInteractionsTab.Append(InteractionIcon);
@@ -533,35 +533,6 @@ namespace BossChecklist
 			}
 		}
 
-		public void ClearHiddenList() {
-			if (!BossChecklist.BossLogConfig.Debug.EnabledResetOptions || WorldAssist.HiddenEntries.Count == 0)
-				return;
-
-			if (!Main.keyState.IsKeyDown(Keys.LeftAlt) && !Main.keyState.IsKeyDown(Keys.RightAlt))
-				return;
-
-			WorldAssist.HiddenEntries.Clear();
-			BossUISystem.Instance.bossChecklistUI.UpdateCheckboxes();
-			Networking.RequestHiddenEntryUpdate();
-			RefreshPageContent();
-		}
-
-		private void ClearMarkedDowns() {
-			if (!BossChecklist.BossLogConfig.Debug.EnabledResetOptions || WorldAssist.MarkedEntries.Count == 0)
-				return;
-
-			if (!Main.keyState.IsKeyDown(Keys.LeftAlt) && !Main.keyState.IsKeyDown(Keys.RightAlt))
-				return;
-
-			WorldAssist.MarkedEntries.Clear();
-			Networking.RequestMarkedEntryUpdate();
-			RefreshPageContent();
-		}
-
-		public void UpdateEntryHiddenStatus() {
-
-		}
-
 		/// <summary>
 		/// While in debug mode, users are able to reset their records of a specific boss by alt and right-clicking the recordnavigation button
 		/// </summary>
@@ -569,10 +540,10 @@ namespace BossChecklist
 			if (!BossChecklist.BossLogConfig.Debug.EnabledResetOptions || SelectedSubPage != SubPage.Records || GetPlayerRecords is null)
 				return; // must be on a valid record page and must have the reset records config enabled
 
-			if (!Main.keyState.IsKeyDown(Keys.LeftAlt) && !Main.keyState.IsKeyDown(Keys.RightAlt))
+			if (!AltKeyIsDown)
 				return; // player must be holding alt
 
-			GetPlayerRecords.ResetStats(RecordSubCategory);
+			GetPlayerRecords.ResetStats(RecordSubCategory); // TODO: Fix this and make a reset for all records of a boss
 			RefreshPageContent();  // update page to show changes
 		}
 
@@ -585,25 +556,13 @@ namespace BossChecklist
 		/// </summary>
 		private void RemoveItem(UIMouseEvent evt, UIElement listeningElement) {
 			if (!BossChecklist.BossLogConfig.Debug.EnabledResetOptions || SelectedSubPage != SubPage.LootAndCollectibles)
-				return; // do not do anything if the loot page isn't the active
+				return; // do not do anything if the loot page isn't active
 
-			if (!Main.keyState.IsKeyDown(Keys.LeftAlt) && !Main.keyState.IsKeyDown(Keys.RightAlt))
-				return; // player must be holding alt to remove any items
+			if (listeningElement is not LogItemSlot slot || !AltKeyIsDown)
+				return; // player must be holding alt over an itemslot to remove items
 
-			// Alt right-click the treasure bag icon to clear the items in the selected entry's page from the player's obtained items list
-			// Alt right-click an item slot to remove that item from the player's obtained items list
 			// Note: items removed are removed from ALL boss loot pages retroactively
-			if (listeningElement is NavigationalButton) {
-				foreach (int item in GetLogEntryInfo.lootItemTypes) {
-					GetModPlayer.BossItemsCollected.Remove(new ItemDefinition(item));
-				}
-				foreach (int item in GetLogEntryInfo.collectibles.Keys.ToList()) {
-					GetModPlayer.BossItemsCollected.Remove(new ItemDefinition(item));
-				}
-			}
-			else if (listeningElement is LogItemSlot slot) {
-				GetModPlayer.BossItemsCollected.Remove(new ItemDefinition(slot.item.type));
-			}
+			GetModPlayer.BossItemsCollected.Remove(new ItemDefinition(slot.item.type));
 			RefreshPageContent(); // update page to show changes
 		}
 
@@ -860,8 +819,7 @@ namespace BossChecklist
 			BossTab.Anchor = FindNextEntry(EntryType.Boss); // Updates the 'next' entries for the tabs and next checkmark
 			MiniBossTab.Anchor = FindNextEntry(EntryType.MiniBoss);
 			EventTab.Anchor = FindNextEntry(EntryType.Event);
-
-			RegenerateInteractionHoverTexts(); // Updates the hover text for the alternate interactive keys list has
+			
 			ResetUIPositioning(); // Repositions common ui elements when the UI is updated
 			ResetBothPages(); // Reset the content of both pages before appending new content for the page
 
@@ -888,33 +846,34 @@ namespace BossChecklist
 		/// <summary>
 		/// Updates the hovertext for the key combinations (ex. Alt+Right-Click element) that are available to the current page.
 		/// </summary>
-		private void RegenerateInteractionHoverTexts() {
+		private string GenerateInteractionHoverText() {
 			string interactions = null;
+			string HiddenTexts = LangLog + ".HintTexts";
 			if (PageNum == Page_TableOfContents) {
 				if (HiddenEntriesMode) {
 					interactions =
-					Language.GetTextValue($"{LangLog}.HintTexts.HideEntry") +
-					(BossChecklist.BossLogConfig.Debug.EnabledResetOptions ? "\n" + Language.GetTextValue($"{LangLog}.HintTexts.ClearHidden") : "");
+					Language.GetTextValue($"{HiddenTexts}.HideEntry") +
+					(BossChecklist.BossLogConfig.Debug.EnabledResetOptions ? "\n" + Language.GetTextValue($"{HiddenTexts}.ClearHidden") : "");
 				}
 				else {
 					interactions =
-					Language.GetTextValue($"{LangLog}.HintTexts.MarkEntry") +
-					(BossChecklist.BossLogConfig.Debug.EnabledResetOptions ? "\n" + Language.GetTextValue($"{LangLog}.HintTexts.ClearMarked") : "");
+					Language.GetTextValue($"{HiddenTexts}.MarkEntry") +
+					(BossChecklist.BossLogConfig.Debug.EnabledResetOptions ? "\n" + Language.GetTextValue($"{HiddenTexts}.ClearMarked") : "");
 				}
 			}
 			else if (PageNum >= 0 && BossChecklist.BossLogConfig.Debug.EnabledResetOptions) {
 				if (SelectedSubPage == SubPage.Records && GetLogEntryInfo.type == EntryType.Boss) {
 					interactions =
-						Language.GetTextValue($"{LangLog}.HintTexts.ClearAllRecords") + "\n" +
-						Language.GetTextValue($"{LangLog}.HintTexts.ClearRecord");
+						Language.GetTextValue($"{HiddenTexts}.ClearAllRecords") + "\n" +
+						Language.GetTextValue($"{HiddenTexts}.ClearRecord");
 				}
 				else if (SelectedSubPage == SubPage.LootAndCollectibles) {
-					interactions = 
-						Language.GetTextValue($"{LangLog}.HintTexts.RemoveItem") + "\n" +
-						Language.GetTextValue($"{LangLog}.HintTexts.ClearItems");
+					interactions =
+						Language.GetTextValue($"{HiddenTexts}.RemoveItem") + "\n" +
+						Language.GetTextValue($"{HiddenTexts}.ClearItems");
 				}
 			}
-			AltInteractionsTab.hoverText = BossChecklist.BossLogConfig.ShowInteractionTooltips ? interactions : null;
+			return BossChecklist.BossLogConfig.ShowInteractionTooltips ? interactions : null;
 		}
 
 		/// <summary>

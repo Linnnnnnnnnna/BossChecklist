@@ -246,6 +246,9 @@ namespace BossChecklist
 			if (BossChecklist.instance == null)
 				return;
 
+			if (Debug.EnabledResetOptions)
+				ShowInteractionTooltips = true; // The Reset Options require the Interaction Toolip tab to function
+
 			UpdateIndicators();
 		}
 	}

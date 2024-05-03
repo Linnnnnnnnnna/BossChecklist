@@ -170,14 +170,14 @@ Mods: {
 			}
 
 			HintTexts: {
-				// MarkEntry: Mark an entry in the checklist as defeated by right-clicking it
-				// HideEntry: Hide an entry from the checklist by left or right-clicking it
-				// ClearMarked: Clear all marked entries to their original defeated state by holding alt and right-clicking the filters tab
-				// ClearHidden: Clear all hidden entries to their original hidden state by holding alt and right-clicking the 'Toggle hidden list' filter
-				// ClearItems: Mark all items on this entry's page as unobtained by holding alt and right-clicking the treasure bag
-				// RemoveItem: Mark an item as unobtained by holding alt and right-clicking the desired item slot
-				// ClearAllRecords: Clear all records for this boss by holding alt and right-clicking the 'Cycle Record SubCategory' button
-				// ClearRecord: Clear a record value by holding alt and right-clicking its icon
+				// MarkEntry: Right-click an entry to mark it as defeated
+				// HideEntry: Left-click an entry to hide it from the checklist
+				// ClearMarked: Hold ALT and right-click this button to clear all marked entries
+				// ClearHidden: Hold ALT and right-click this button to clear all hidden entries
+				// ClearItems: Hold ALT and right-click this button to mark the listed items as unobtained
+				// RemoveItem: Hold ALT and right-click an item to mark it as unobtained
+				// ClearAllRecords: Hold ALT and right-click this button to reset the list record values
+				// ClearRecord: Hold ALT and right-click the icon of a record to reset its value
 			}
 		}
 
@@ -522,7 +522,8 @@ Mods: {
 					/* Tooltip:
 						'''
 						When enabled, your are able to clear or reset certain data within the Boss Log.
-						Includes: Clearing hidden entries, clearing marked entries, resetting loot checklist, and resetting records.
+						Includes: Clearing hidden entries, clearing marked entries, clearing loot checklist, and resetting records.
+						[c/FF0000:The 'Enable Interactions Tab' config is required in order to use this config.]
 						''' */
 				}
 
