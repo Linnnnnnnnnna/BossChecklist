@@ -77,7 +77,7 @@ namespace BossChecklist
 		public NavigationalButton NextPage;
 		public NavigationalButton PrevPage;
 
-		public SubPage SelectedSubPage = SubPage.Records;
+		public SubPage SelectedSubPage = SubPage.SpawnInfo;
 		public SubPageButton recordButton;
 		public SubPageButton spawnButton;
 		public SubPageButton lootButton;
@@ -390,18 +390,18 @@ namespace BossChecklist
 			hardmodeList.PaddingTop = 5;
 
 			recordButton = new SubPageButton(BossLogResources.Nav_SubPage, SubPage.Records);
-			recordButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 - (int)recordButton.Width.Pixels - 8;
-			recordButton.Top.Pixels = 5;
+			recordButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 - BossLogResources.Nav_SubPage.Value.Width / 2;
+			recordButton.Top.Pixels = 5 + BossLogResources.Nav_SubPage.Value.Height + 10;
 			recordButton.OnLeftClick += (a, b) => UpdateSelectedPage(PageNum, SubPage.Records);
 
 			spawnButton = new SubPageButton(BossLogResources.Nav_SubPage, SubPage.SpawnInfo);
-			spawnButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 + 8;
+			spawnButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 - BossLogResources.Nav_SubPage.Value.Width - 8;
 			spawnButton.Top.Pixels = 5;
 			spawnButton.OnLeftClick += (a, b) => UpdateSelectedPage(PageNum, SubPage.SpawnInfo);
 
 			lootButton = new SubPageButton(BossLogResources.Nav_SubPage, SubPage.LootAndCollectibles);
-			lootButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 - (int)lootButton.Width.Pixels / 2;
-			lootButton.Top.Pixels = 5 + BossLogResources.Nav_SubPage.Value.Height + 10;
+			lootButton.Left.Pixels = (int)PageTwo.Width.Pixels / 2 + 8;
+			lootButton.Top.Pixels = 5;
 			lootButton.OnLeftClick += (a, b) => UpdateSelectedPage(PageNum, SubPage.LootAndCollectibles);
 
 			// Record Type navigation buttons
@@ -795,7 +795,7 @@ namespace BossChecklist
 					// If Progressive Checklist is enabled, and the Loot subpage is trying to be accessed, deny it
 					// This can also happen if the loot page is already selected and a navigation button is used to access a locked page
 					if (SelectedSubPage == SubPage.LootAndCollectibles)
-						SelectedSubPage = SubPage.Records;
+						SelectedSubPage = SubPage.SpawnInfo;
 				}
 				else {
 					SelectedSubPage = subPage;
@@ -1245,8 +1245,8 @@ namespace BossChecklist
 						PageTwo.Append(button);
 						int xOffset = count % 2 == 0 ? (count + 1 == total ? 15 : 0) : 30;
 						int yOffset = count > 1 ? 30 : (total > 2 ? 0 : 15);
-						button.Left.Pixels = (int)(lootButton.Left.Pixels + lootButton.Width.Pixels + 20 + xOffset);
-						button.Top.Pixels = (int)(lootButton.Top.Pixels + yOffset);
+						button.Left.Pixels = (int)(recordButton.Left.Pixels + recordButton.Width.Pixels + 20 + xOffset);
+						button.Top.Pixels = (int)(recordButton.Top.Pixels + yOffset);
 						count++;
 					}
 				}
