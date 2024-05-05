@@ -171,13 +171,13 @@ Mods: {
 
 			HintTexts: {
 				MarkEntry: 右键条目以将其标记为已击败
-				HideEntry: 左键或右键条目以将其从列表中隐藏
-				ClearMarked: 长按Alt并左键过滤器标签以将所有被标记的条目恢复至原始击败状态
-				ClearHidden: 长按Alt并右键'切换隐藏列表'按钮以将所有被隐藏的条目恢复至原始隐藏状态
-				ClearItems: 长按Alt并右键宝藏袋以将该条目页面的所有物品标记为未获取
-				RemoveItem: 长按Alt并右键条目页面内的物品以将选定的物品标记为未获取
-				ClearAllRecords: 长按Alt并右键'全部记录子类'按钮以清除该Boss的所有记录
-				ClearRecord: 长按Alt并右键记录值以清除对应的记录
+				HideEntry: 左键条目以将其从列表中隐藏
+				ClearMarked: 长按Alt并左键此按钮以清除所有被标记的条目
+				ClearHidden: 长按Alt并右键此按钮以清除所有被隐藏的条目
+				ClearItems: 长按Alt并右键此按钮以将列表中的所有物品标记为未获取
+				RemoveItem: 长按Alt并右键物品以将选定的物品标记为未获取
+				ClearAllRecords: 长按Alt并右键此按钮以重置列表的记录值
+				ClearRecord: 长按Alt并右键记录的图标以重置其值
 			}
 		}
 
@@ -523,6 +523,7 @@ Mods: {
 						'''
 						启用后, 你可以清除或重置Boss日志中的某些数据.
 						包括: 清除被隐藏的条目、清除被标记的条目、重置战利品清单和重置记录.
+						[c/FF0000:此项配置需要启用'启用交互栏'配置后才能启用.]
 						'''
 				}
 
