@@ -1,6 +1,7 @@
 ﻿using BossChecklist.UIElements;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace BossChecklist
@@ -31,7 +32,7 @@ namespace BossChecklist
 					BossUISystem.Instance.BossLog.ToggleBossLog(false);
 					Main.LocalPlayer.releaseInventory = false;
 				}
-				else if (Main.LocalPlayer.controlCreativeMenu) {
+				else if (Main.LocalPlayer.controlCreativeMenu && Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative) {
 					BossUISystem.Instance.BossLog.ToggleBossLog(false);
 					Main.LocalPlayer.releaseCreativeMenu = false;
 				}
