@@ -235,8 +235,7 @@ namespace BossChecklist
 
 			BossChecklist.instance.Logger.Info(Log.Indicators[2].hoverText);
 
-			string type = Language.GetTextValue($"{BossLogUI.LangLog}.Common.{(BossChecklist.BossLogConfig.ProgressiveChecklist ? "Entry" : "Boss")}");
-			Log.BossTab.hoverText = Language.GetTextValue($"{BossLogUI.LangLog}.Tabs.NextEntry", type, BossChecklist.bossTracker.SortedEntries[BossLogUI.FindNextEntry(EntryType.Boss)].DisplayName);
+			Log.BossTab.Anchor = BossLogUI.FindNextEntry(EntryType.Boss); // update the Next entry/boss tab based on Indicator selections
 
 			if (Log.PageNum == BossLogUI.Page_TableOfContents)
 				Log.RefreshPageContent();

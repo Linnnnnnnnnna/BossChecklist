@@ -1217,7 +1217,7 @@ namespace BossChecklist.UIElements
 					if (Id == "TableOfContents") {
 						this.hoverText = value == null ? $"{BossLogUI.LangLog}.Tabs.ToggleFilters" : $"{BossLogUI.LangLog}.Tabs.TableOfContents";
 					}
-					else if (Id != "Credits" && value.HasValue && value.Value != -1) {
+					else if (Id != "Credits" && value.HasValue && value.Value >= 0 && value.Value < BossChecklist.bossTracker.SortedEntries.Count) {
 						EntryInfo entry = BossChecklist.bossTracker.SortedEntries[value.Value];
 						string type = Language.GetTextValue($"{BossLogUI.LangLog}.Common.{(BossChecklist.BossLogConfig.ProgressiveChecklist ? "Entry" : entry.type)}");
 						this.hoverText = Language.GetTextValue($"{BossLogUI.LangLog}.Tabs.NextEntry", type, entry.DisplayName);
