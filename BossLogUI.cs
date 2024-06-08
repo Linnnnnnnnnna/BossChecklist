@@ -1612,7 +1612,7 @@ namespace BossChecklist
 			bossItems.Remove(GetLogEntryInfo.TreasureBag); // the treasurebag should not be displayed on the loot table, but drawn above it instead
 
 			// Prevents itemslot creation for items that are dropped from within the opposite world evil, if applicable
-			if (!Main.drunkWorld && !ModLoader.TryGetMod("BothEvils", out Mod mod)) {
+			if (!Main.drunkWorld) {
 				foreach (DropRateInfo loot in GetLogEntryInfo.loot) {
 					if (loot.conditions is null)
 						continue;
