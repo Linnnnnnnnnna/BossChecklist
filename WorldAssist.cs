@@ -29,8 +29,6 @@ namespace BossChecklist
 		public static bool downedFlyingDutchman;
 		public static bool downedMartianSaucer;
 
-		private static bool TrackingMoons = false; // This will help to prevent moon down checks from leaking into other worlds
-
 		public override void Load() {
 			On_Main.UpdateTime_StartDay += OnStartDay_CheckMoonEvents;
 			On_Main.UpdateTime_StartNight += OnStartNight_CheckEclipseDown;
@@ -40,19 +38,17 @@ namespace BossChecklist
 		/// Before varibles are change for day (dawn), check for any moon events and mark as defeated it so.
 		/// </summary>
 		internal static void OnStartDay_CheckMoonEvents(On_Main.orig_UpdateTime_StartDay orig, ref bool stopEvents) {
-			if (TrackingMoons) {
-				if (Main.bloodMoon) {
-					AnnounceEventEnd("BloodMoon"); // Sends a message to all players that the moon event has ended
-					Networking.DownedEntryCheck(ref downedBloodMoon);
-				}
-				else if (Main.snowMoon) {
-					AnnounceEventEnd("FrostMoon");
-					Networking.DownedEntryCheck(ref downedFrostMoon);
-				}
-				else if (Main.pumpkinMoon) {
-					AnnounceEventEnd("PumpkinMoon");
-					Networking.DownedEntryCheck(ref downedPumpkinMoon);
-				}
+			if (Main.bloodMoon) {
+				AnnounceEventEnd("BloodMoon"); // Sends a message to all players that the moon event has ended
+				Networking.DownedEntryCheck(ref downedBloodMoon);
+			}
+			if (Main.snowMoon) {
+				AnnounceEventEnd("FrostMoon");
+				Networking.DownedEntryCheck(ref downedFrostMoon);
+			}
+			if (Main.pumpkinMoon) {
+				AnnounceEventEnd("PumpkinMoon");
+				Networking.DownedEntryCheck(ref downedPumpkinMoon);
 			}
 			orig(ref stopEvents);
 		}
@@ -61,11 +57,11 @@ namespace BossChecklist
 		/// Before varibles are change for night (dusk), check for the eclipse event and mark as defeated it so.
 		/// </summary>
 		internal static void OnStartNight_CheckEclipseDown(On_Main.orig_UpdateTime_StartNight orig, ref bool stopEvents) {
-			if (TrackingMoons && Main.eclipse) {
+			if (Main.eclipse) {
 				AnnounceEventEnd("Eclipse");
 				Networking.DownedEntryCheck(ref downedSolarEclipse);
 			}
-			orig(ref stopEvents);
+			orig(ref stopEvents); // Original method turns off any moon states
 		}
 
 		public override void ClearWorld() {
@@ -73,7 +69,6 @@ namespace BossChecklist
 			MarkedEntries.Clear();
 			WorldRecordsForWorld.Clear();
 			WorldRecordsForWorld_Unloaded.Clear();
-			TrackingMoons = false; // turn tracker off
 			downedBloodMoon = downedFrostMoon = downedPumpkinMoon = downedSolarEclipse = false; // clear moon downs
 			downedDarkMage = downedOgre = downedFlyingDutchman = downedMartianSaucer = false; // clear mini-boss downs
 			
@@ -85,21 +80,12 @@ namespace BossChecklist
 			MarkedEntries.Clear();
 			WorldRecordsForWorld.Clear();
 			WorldRecordsForWorld_Unloaded.Clear();
-			TrackingMoons = true; // ensure trackers are started again once the world is loaded
 
 			// Record related lists that should be the same count of record tracking entries
 			ActiveNPCEntryFlags = new int[Main.maxNPCs];
 			for (int i = 0; i < Main.maxNPCs; i++) {
 				ActiveNPCEntryFlags[i] = -1;
 			}
-		}
-
-		public override void OnWorldUnload() {
-			TrackingMoons = false; // Unloaded worlds turns off moon tracking
-		}
-
-		public override void PreWorldGen() {
-			TrackingMoons = false; // World Generation should start with the tracker false before anything (prevents moon defeations leaking into other worlds)
 		}
 
 		public override void SaveWorldData(TagCompound tag) {
