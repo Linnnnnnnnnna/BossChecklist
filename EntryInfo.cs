@@ -143,7 +143,7 @@ namespace BossChecklist
 		/// <returns>A LocalizedText of the despawn message of the passed npc. Returns null if no message can be found.</returns>
 		internal LocalizedText GetDespawnMessage(NPC npc) {
 			// When unique despawn messages are enabled, pass the NPC for the custom message function provided by the entry
-			if (BossChecklist.FeatureConfig.DespawnMessageType == "Unique" && customDespawnMessages(npc) is LocalizedText message)
+			if (BossChecklist.FeatureConfig.DespawnMessageType == "Unique" && customDespawnMessages(npc) is LocalizedText message && Language.Exists(message.Key))
 				return message; // this will only return a unique message if the custom message function properly assigns one
 
 			// If the Unique message was empty/null or the player is using Generic despawn messages, try to find an appropriate despawn message to send
