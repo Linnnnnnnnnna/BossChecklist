@@ -256,7 +256,7 @@ namespace BossChecklist
 		
 		// Respawn timer feature
 		public override void UpdateDead() {
-			if (Main.netMode == NetmodeID.Server || Player.whoAmI == 255)
+			if (Main.netMode == NetmodeID.Server || Player.whoAmI == 255 || Player.whoAmI != Main.myPlayer)
 				return;
 
 			// Timer sounds when a player is about to respawn
