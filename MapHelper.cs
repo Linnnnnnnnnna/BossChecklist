@@ -15,12 +15,11 @@ namespace BossChecklist
 			if (BossChecklist.FeatureConfig.ItemMapDrawingEnabled is false || Main.item is null)
 				return; // loop through items only if at least one of the configs is enabled
 
-			foreach (Item item in Main.item) {
-				if (!item.active || !IsWhitelistedItem(item.type))
+			foreach (Item item in Main.ActiveItems) {
+				if (!IsWhitelistedItem(item.type))
 					continue; // do not draw items that are inacive or not whitelisted
 
-				if (!TextureAssets.Item[item.type].IsLoaded)
-					Main.instance.LoadItem(item.type); // Items SHOULD already be loaded, but in case it isn't have a backup
+				Main.instance.LoadItem(item.type); // Items SHOULD already be loaded, but in case it isn't have a backup
 
 				if (context.Draw(TextureAssets.Item[item.type].Value, item.VisualPosition / 16, Color.White, new SpriteFrame(1, 1, 0, 0), 1f, 1.2f, Alignment.Center).IsMouseOver)
 					text = item.HoverName; // Display the item's hover name when hovering over the icon
@@ -34,7 +33,7 @@ namespace BossChecklist
 			else if (type == ItemID.ShadowScale || type == ItemID.TissueSample) {
 				return BossChecklist.FeatureConfig.ScalesOnMap;
 			}
-			else if (RecipeGroup.recipeGroups[RecipeGroupID.Fragment].ValidItems.Any(x => x == type)) {
+			else if (RecipeGroup.recipeGroups[RecipeGroupID.Fragment].ValidItems.Contains(type)) {
 				return BossChecklist.FeatureConfig.FragmentsOnMap;
 			}
 			return false;
