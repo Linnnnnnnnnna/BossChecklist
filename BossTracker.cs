@@ -212,6 +212,7 @@ namespace BossChecklist
 					.WithCustomHeadIcon($"Terraria/Images/Extra_10"),
 				EntryInfo.MakeVanillaBoss(EntryType.MiniBoss, MartianSaucer, "NPCName.MartianSaucer", new List<int>() { NPCID.MartianSaucer, NPCID.MartianSaucerCore }, () => WorldAssist.downedMartianSaucer),
 				EntryInfo.MakeVanillaEvent(LunarEvent, "Lunar Event", () => NPC.downedTowers)
+					.WithCustomTranslationKey("Mods.BossChecklist.Checklist.CelestialPillars")
 					.WithCustomLimbs(new List<int>() { NPCID.LunarTowerVortex, NPCID.LunarTowerStardust, NPCID.LunarTowerNebula, NPCID.LunarTowerSolar })
 					.WithCustomPortrait($"BossChecklist/Resources/BossTextures/EventLunarEvent")
 					.WithCustomHeadIcon(new List<string>() {

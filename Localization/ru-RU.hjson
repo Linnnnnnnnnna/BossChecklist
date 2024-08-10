@@ -183,6 +183,7 @@ Mods: {
 		}
 
 		Checklist: {
+			// CelestialPillars: Celestial Pillars
 			ToggleCompletedTooltip: Отображение пройденного
 			ToggleMiniBossesTooltip: Отображение мини-боссов
 			ToggleEventsTooltip: Отображение событий

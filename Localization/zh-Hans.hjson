@@ -182,6 +182,7 @@ Mods: {
 		}
 
 		Checklist: {
+			// CelestialPillars: Celestial Pillars
 			ToggleCompletedTooltip: 开关显示已完成的
 			ToggleMiniBossesTooltip: 开关显示小Boss
 			ToggleEventsTooltip: 开关显示事件

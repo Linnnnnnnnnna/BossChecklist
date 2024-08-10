@@ -182,6 +182,7 @@ Mods: {
 		}
 
 		Checklist: {
+			CelestialPillars: Celestial Pillars
 			ToggleCompletedTooltip: Toggle Completed
 			ToggleMiniBossesTooltip: Toggle Mini Bosses
 			ToggleEventsTooltip: Toggle Events
