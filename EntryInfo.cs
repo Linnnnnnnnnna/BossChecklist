@@ -23,7 +23,6 @@ namespace BossChecklist
 
 	internal enum CollectibleType {
 		Generic,
-		TreasureBag,
 		Relic,
 		Trophy,
 		Mask,

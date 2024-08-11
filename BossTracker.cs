@@ -426,23 +426,6 @@ namespace BossChecklist
 					}
 				}
 
-				// Assign this boss's treasure bag, looking through the loot found by the bestiary
-				if (!vanillaBossBags.TryGetValue(entry.Key, out int bag) && entry.type != EntryType.Event) {
-					foreach (int itemType in entry.lootItemTypes) {
-						if (ContentSamples.ItemsByType.TryGetValue(itemType, out Item item) && ItemID.Sets.BossBag[item.type]) {
-							if (entry.collectibles.TryAdd(itemType, CollectibleType.TreasureBag) is false) {
-								entry.collectibles[itemType] = CollectibleType.TreasureBag;
-							}
-							break;
-						}
-					}
-				}
-				else {
-					if (entry.collectibles.TryAdd(bag, CollectibleType.TreasureBag) is false) {
-						entry.collectibles[bag] = CollectibleType.TreasureBag;
-					}
-				}
-
 				// If the treasure bag is assigned, look through its loot table for expert exclusive items
 				if (entry.TreasureBag != 0) {
 					List<IItemDropRule> dropRules = Main.ItemDropsDB.GetRulesForItemID(entry.TreasureBag);
@@ -1042,31 +1025,6 @@ namespace BossChecklist
 					NPCID.StardustWormHead,
 				}
 			}
-		};
-
-		internal readonly static Dictionary<string, int> vanillaBossBags = new Dictionary<string, int>() {
-			{ "Terraria KingSlime", ItemID.KingSlimeBossBag },
-			{ "Terraria EyeofCthulhu", ItemID.EyeOfCthulhuBossBag },
-			{ "Terraria EaterofWorlds", ItemID.EaterOfWorldsBossBag },
-			{ "Terraria BrainofCthulhu", ItemID.BrainOfCthulhuBossBag },
-			{ "Terraria QueenBee", ItemID.QueenBeeBossBag },
-			{ "Terraria Skeletron", ItemID.SkeletronBossBag },
-			{ "Terraria WallofFlesh", ItemID.WallOfFleshBossBag },
-			{ "Terraria TheTwins", ItemID.TwinsBossBag },
-			{ "Terraria TheDestroyer", ItemID.DestroyerBossBag },
-			{ "Terraria SkeletronPrime", ItemID.SkeletronPrimeBossBag },
-			{ "Terraria Plantera", ItemID.PlanteraBossBag },
-			{ "Terraria Golem", ItemID.GolemBossBag },
-			{ "Terraria DukeFishron", ItemID.FishronBossBag },
-			{ "Terraria MoonLord", ItemID.MoonLordBossBag },
-			{ "Terraria DD2Betsy", ItemID.BossBagBetsy },
-			{ "Terraria QueenSlimeBoss", ItemID.QueenSlimeBossBag },
-			{ "Terraria HallowBoss", ItemID.FairyQueenBossBag },
-			{ "Terraria Deerclops", ItemID.DeerclopsBossBag },
-			// Unobtainable treasure bages...
-			{ "Terraria DD2DarkMageT3", ItemID.BossBagDarkMage },
-			{ "Terraria DD2OgreT3", ItemID.BossBagOgre },
-			{ "Terraria CultistBoss", ItemID.CultistBossBag }
 		};
 
 		public bool IsRegisteredMusicBox(int type) => vanillaMusicBoxTypes.Contains(type) || otherWorldMusicBoxTypes.Contains(type) || BossChecklist.itemToMusicReference.ContainsKey(type);
