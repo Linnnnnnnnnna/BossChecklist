@@ -126,7 +126,7 @@ namespace BossChecklist
 
 		internal int GetIndex => BossChecklist.bossTracker.SortedEntries.IndexOf(this);
 
-		internal int TreasureBag => collectibles.FirstOrDefault(x => x.Value == CollectibleType.TreasureBag).Key;
+		internal int TreasureBag => loot.FirstOrDefault(drops => ItemID.Sets.BossBag[drops.itemId] && this.type != EntryType.Event).itemId;
 
 		internal int Relic => collectibles.FirstOrDefault(x => x.Value == CollectibleType.Relic).Key;
 
