@@ -27,7 +27,7 @@ namespace BossChecklist
 		Trophy,
 		Mask,
 		Music,
-		Pet,
+		MasterPet,
 		Mount
 	}
 

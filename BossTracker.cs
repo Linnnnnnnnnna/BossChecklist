@@ -293,8 +293,8 @@ namespace BossChecklist
 					else if (IsRegisteredMusicBox(item)) {
 						entry.collectibles[item] = CollectibleType.Music;
 					}
-					else if ((Main.projPet[temp.shoot] && Main.vanityPet[temp.buffType]) || (ProjectileID.Sets.LightPet[temp.shoot] && Main.lightPet[temp.buffType])) {
-						entry.collectibles[item] = CollectibleType.Pet;
+					else if (temp.master && ((Main.projPet[temp.shoot] && Main.vanityPet[temp.buffType]) || (ProjectileID.Sets.LightPet[temp.shoot] && Main.lightPet[temp.buffType]))) {
+						entry.collectibles[item] = CollectibleType.MasterPet;
 					}
 					else if (temp.master && temp.mountType > MountID.None) {
 						entry.collectibles[item] = CollectibleType.Mount;
