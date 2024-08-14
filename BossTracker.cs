@@ -297,7 +297,7 @@ namespace BossChecklist
 						entry.collectibles[item] = CollectibleType.MasterPet;
 					}
 					else if (temp.master && temp.mountType > MountID.None) {
-						entry.collectibles[item] = CollectibleType.Mount;
+						entry.collectibles[item] = CollectibleType.MasterPet;
 					}
 					else if (temp.createTile > TileID.Dirt && TileObjectData.GetTileData(temp.createTile, temp.placeStyle) is TileObjectData data) {
 						if (data.AnchorWall == TileObjectData.Style3x3Wall.AnchorWall && data.Width == 3 && data.Height == 3) {
@@ -314,6 +314,7 @@ namespace BossChecklist
 						entry.collectibles[item] = CollectibleType.Generic;
 					}
 				}
+				entry.collectibles = entry.collectibles.OrderBy(x => x.Value).ToDictionary(); // sorts collectibles by type, which is important for the loost list ordering
 			}
 		}
 

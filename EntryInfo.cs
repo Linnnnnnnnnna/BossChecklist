@@ -22,13 +22,12 @@ namespace BossChecklist
 	}
 
 	internal enum CollectibleType {
-		Generic,
 		Relic,
+		MasterPet,
 		Trophy,
 		Mask,
 		Music,
-		MasterPet,
-		Mount
+		Generic,
 	}
 
 	internal class EntryInfo {

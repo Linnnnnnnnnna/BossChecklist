@@ -136,14 +136,12 @@ namespace BossChecklist.Resources
 			Content_ProgressiveOff = PreloadResource($"Extra_ProgressiveOff");
 
 			Content_CollectibleType = [
-				PreloadResource("Checks_Generic"),
-				PreloadResource("Checks_Generic"), // No texture specifically for Treasure Bag
 				PreloadResource("Checks_Trophy"), // No texture specifically for Relic
+				PreloadResource("Checks_Pet"),
 				PreloadResource("Checks_Trophy"),
 				PreloadResource("Checks_Mask"),
 				PreloadResource("Checks_Music"),
-				PreloadResource("Checks_Pet"),
-				PreloadResource("Checks_Pet"), // No texture specifically for Mount
+				PreloadResource("Checks_Generic"),
 			];
 
 			FilterToIcon = new Dictionary<string, Asset<Texture2D>>() {
