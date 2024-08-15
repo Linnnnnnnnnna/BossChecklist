@@ -1639,7 +1639,7 @@ namespace BossChecklist
 			}
 
 			// the expert item should appear after the master mode collectibles
-			if (!bossItems.Contains(GetLogEntryInfo.ExpertItem))
+			if (GetLogEntryInfo.ExpertItem > 0 && !bossItems.Contains(GetLogEntryInfo.ExpertItem))
 				bossItems.Insert((int)CollectibleType.Trophy, GetLogEntryInfo.ExpertItem);
 
 			// finally, the rest of the drops are added (including the generic collectibles)
