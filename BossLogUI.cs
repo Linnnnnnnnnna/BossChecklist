@@ -15,7 +15,6 @@ using Terraria.GameContent.ItemDropRules;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
-using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
@@ -1608,24 +1607,48 @@ namespace BossChecklist
 			PageTwo.Append(treasureBag);
 
 			List<ItemDefinition> obtainedItems = GetModPlayer.BossItemsCollected;
-			List<int> bossItems = new List<int>(GetLogEntryInfo.lootItemTypes.Union(GetLogEntryInfo.collectibles.Keys.ToList())); // combined list of loot and collectibles
-			bossItems.Remove(GetLogEntryInfo.TreasureBag); // the treasurebag should not be displayed on the loot table, but drawn above it instead
+			List<DropRateInfo> bossDrops = new List<DropRateInfo>(GetLogEntryInfo.loot); // combined list of loot and collectibles
 
-			// Prevents itemslot creation for items that are dropped from within the opposite world evil, if applicable
-			if (!Main.drunkWorld) {
-				foreach (DropRateInfo loot in GetLogEntryInfo.loot) {
-					if (loot.conditions is null)
-						continue;
+			foreach (DropRateInfo drop in GetLogEntryInfo.loot) {
+				// the treasurebag should not be displayed on the loot table, but drawn above it instead
+				// coins should not be displayed
+				if (drop.itemId == GetLogEntryInfo.TreasureBag || ItemID.Sets.CommonCoin[drop.itemId]) {
+					bossDrops.Remove(drop);
+					continue;
+				}
 
-					bool isCorruptionLocked = WorldGen.crimson && loot.conditions.Any(x => x is Conditions.IsCorruption || x is Conditions.IsCorruptionAndNotExpert);
-					bool isCrimsonLocked = !WorldGen.crimson && loot.conditions.Any(x => x is Conditions.IsCrimson || x is Conditions.IsCrimsonAndNotExpert);
+				if (drop.conditions is null)
+					continue; // this includes the expert item for vanilla entries
 
-					if (bossItems.Contains(loot.itemId) && (isCorruptionLocked || isCrimsonLocked))
-						bossItems.Remove(loot.itemId);
+				foreach (var cond in drop.conditions) {
+					// any item that is unobtainable should not be displayed
+					if (cond.CanShowItemDropInUI() is false) {
+						bossDrops.Remove(drop);
+						break;
+					}
 				}
 			}
 
-			// If the boss items contains any otherworld music boxes
+			// Standard collectible items should appear first. Generic collectibles only appear if they are obtainable.
+			List<int> bossItems = new List<int>();
+			for (int i = 0; i < (int)CollectibleType.Generic; i++) {
+				foreach (KeyValuePair<int, CollectibleType> item in GetLogEntryInfo.collectibles.Where(x => x.Value == (CollectibleType)i)) {
+					if (!bossItems.Contains(item.Key))
+						bossItems.Add(item.Key);
+				}
+			}
+
+			// the expert item should appear after the master mode collectibles
+			if (!bossItems.Contains(GetLogEntryInfo.ExpertItem))
+				bossItems.Insert((int)CollectibleType.Trophy, GetLogEntryInfo.ExpertItem);
+
+			// finally, the rest of the drops are added (including the generic collectibles)
+			foreach (DropRateInfo drop in bossDrops) {
+				if (!bossItems.Contains(drop.itemId))
+					bossItems.Add(drop.itemId);
+			}
+
+			// If the boss items contains any otherworld music boxes, check the status of OtherWorld music obtainability
 			if (bossItems.Intersect(BossChecklist.bossTracker.otherWorldMusicBoxTypes).Any()) {
 				FieldInfo TOWMusicUnlocked = typeof(Main).GetField("TOWMusicUnlocked", BindingFlags.Static | BindingFlags.NonPublic);
 				bool OWUnlocked = (bool)TOWMusicUnlocked.GetValue(null);

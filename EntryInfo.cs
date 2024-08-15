@@ -52,6 +52,7 @@ namespace BossChecklist
 		internal Dictionary<int, CollectibleType> collectibles;
 		internal List<DropRateInfo> loot;
 		internal List<int> lootItemTypes;
+		internal List<int> lootItemTypes_BagExclusives;
 
 		internal Asset<Texture2D> portraitTexture; // used for vanilla entry portrait drawing
 		internal Action<SpriteBatch, Rectangle, Color> customDrawing; // used for modded entry portrait drawing
@@ -127,6 +128,8 @@ namespace BossChecklist
 		internal int TreasureBag => loot.FirstOrDefault(drops => ItemID.Sets.BossBag[drops.itemId] && this.type != EntryType.Event).itemId;
 
 		internal int Relic => collectibles.FirstOrDefault(x => x.Value == CollectibleType.Relic).Key;
+
+		internal int ExpertItem => lootItemTypes_BagExclusives.FirstOrDefault(x => ContentSamples.ItemsByType[x].expert);
 
 		internal List<int> CollectibleDrops => lootItemTypes.Intersect(collectibles.Keys).ToList();
 
@@ -261,6 +264,7 @@ namespace BossChecklist
 			this.relatedEntries = new List<string>(); /// Setup in <see cref="BossTracker.SetupEntryRelations"/>
 			this.loot = new List<DropRateInfo>(); /// Setup in <see cref="BossTracker.FinalizeEntryLootTables"/>
 			this.lootItemTypes = new List<int>(); /// Setup in <see cref="BossTracker.FinalizeEntryLootTables"/>
+			this.lootItemTypes_BagExclusives = new List<int>(); /// Setup in <see cref="BossTracker.FinalizeEntryLootTables"/>
 			this.collectibles = new Dictionary<int, CollectibleType>(); /// Setup in <see cref="BossTracker.FinalizeCollectibleTypes"/>
 			if (extraData?.ContainsKey("collectibles") == true)
 				InterpretObjectAsListOfInt(extraData["collectibles"]).ForEach(item => collectibles.TryAdd(item, CollectibleType.Generic)); // default to Generic

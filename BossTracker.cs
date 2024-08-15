@@ -440,33 +440,12 @@ namespace BossChecklist
 						if (dropRate.itemId <= 0)
 							continue;
 
-						Item item = ContentSamples.ItemsByType[dropRate.itemId];
-						if (item.expert || item.expertOnly || item.master || item.masterOnly) {
-							if (!entry.lootItemTypes.Contains(dropRate.itemId))
-								entry.lootItemTypes.Add(dropRate.itemId);
-						}
+						if (!entry.lootItemTypes_BagExclusives.Contains(dropRate.itemId))
+							entry.lootItemTypes_BagExclusives.Add(dropRate.itemId);
 					}
 				}
 
-
-				// Sorts Master Mode items first, Expert Mode items second, and leaves the remaining items last
-				List<int> masterItems = new List<int>();
-				List<int> expertItems = new List<int>();
-				List<int> normalItems = new List<int>();
-				foreach (int item in entry.lootItemTypes) {
-					Item refItem = ContentSamples.ItemsByType[item];
-					if (refItem.master || refItem.masterOnly) {
-						masterItems.Add(item);
-					}
-					else if (refItem.expert || refItem.expertOnly) {
-						expertItems.Add(item);
-					}
-					else {
-						normalItems.Add(item);
-					}
-				}
-				normalItems.Sort();
-				entry.lootItemTypes = masterItems.Concat(expertItems).Concat(normalItems).ToList();
+				entry.lootItemTypes.AddRange(entry.lootItemTypes_BagExclusives);
 			}
 		}
 

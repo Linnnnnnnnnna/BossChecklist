@@ -622,10 +622,11 @@ namespace BossChecklist.UIElements
 
 				/// Everything below is being set up for loot related itemslots ///
 				EntryInfo entry = LogUI.GetLogEntryInfo;
-				bool expertRestricted = item.expert && !Main.expertMode;
-				bool masterRestricted = item.master && !Main.masterMode;
+				bool isMasterPet = entry.collectibles.ContainsKey(item.type) && (entry.collectibles[item.type] is CollectibleType.MasterPet);
+				bool MasterItemRestricted = (item.type == entry.Relic || isMasterPet) && !Main.masterMode;
+				bool ExpertItemRestricted = item.type == entry.ExpertItem && !Main.expertMode;
 				bool OWmusicRestricted = BossChecklist.bossTracker.otherWorldMusicBoxTypes.Contains(item.type) && !BossLogUI.OtherworldUnlocked;
-				bool isRestricted = expertRestricted || masterRestricted || OWmusicRestricted;
+				bool isRestricted = MasterItemRestricted || ExpertItemRestricted || OWmusicRestricted;
 
 				// Make a backups of the original itemslot texture and alter the texture to display the color needed
 				// If the config 'Hide boss drops' is enabled and the boss hasn't been defeated yet, the itemslot should appear red, even if the item was already obtained
@@ -665,20 +666,20 @@ namespace BossChecklist.UIElements
 				}
 
 				if (!hasItem) {
-					if (expertRestricted) {
-						expertModeIcon ??= BossLogResources.RequestVanillaTexture("UI/WorldCreation/IconDifficultyExpert");
-						spriteBatch.Draw(expertModeIcon.Value, pos, Color.White);
-						if (IsMouseHovering) {
-							BossUISystem.Instance.UIHoverText = $"{BossLogUI.LangLog}.LootAndCollection.ItemIsExpertOnly";
-							BossUISystem.Instance.UIHoverTextColor = Main.DiscoColor; // mimics Expert Mode color
-						}
-					}
-					else if (masterRestricted) {
+					if (MasterItemRestricted) {
 						masterModeIcon ??= BossLogResources.RequestVanillaTexture("UI/WorldCreation/IconDifficultyMaster");
 						spriteBatch.Draw(masterModeIcon.Value, pos, Color.White);
 						if (IsMouseHovering) {
 							BossUISystem.Instance.UIHoverText = $"{BossLogUI.LangLog}.LootAndCollection.ItemIsMasterOnly";
 							BossUISystem.Instance.UIHoverTextColor = new Color(255, (byte)(Main.masterColor * 200f), 0, Main.mouseTextColor); // mimics Master Mode color
+						}
+					}
+					else if (ExpertItemRestricted) {
+						expertModeIcon ??= BossLogResources.RequestVanillaTexture("UI/WorldCreation/IconDifficultyExpert");
+						spriteBatch.Draw(expertModeIcon.Value, pos, Color.White);
+						if (IsMouseHovering) {
+							BossUISystem.Instance.UIHoverText = $"{BossLogUI.LangLog}.LootAndCollection.ItemIsExpertOnly";
+							BossUISystem.Instance.UIHoverTextColor = Main.DiscoColor; // mimics Expert Mode color
 						}
 					}
 					else if (OWmusicRestricted) {
