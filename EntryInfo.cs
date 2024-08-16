@@ -266,8 +266,14 @@ namespace BossChecklist
 			this.lootItemTypes = new List<int>(); /// Setup in <see cref="BossTracker.FinalizeEntryLootTables"/>
 			this.lootItemTypes_BagExclusives = new List<int>(); /// Setup in <see cref="BossTracker.FinalizeEntryLootTables"/>
 			this.collectibles = new Dictionary<int, CollectibleType>(); /// Setup in <see cref="BossTracker.FinalizeCollectibleTypes"/>
-			if (extraData?.ContainsKey("collectibles") == true)
-				InterpretObjectAsListOfInt(extraData["collectibles"]).ForEach(item => collectibles.TryAdd(item, CollectibleType.Generic)); // default to Generic
+			if (extraData?.ContainsKey("collectibles") == true) {
+				if (extraData["collectibles"] is Dictionary<int, CollectibleType> collection) {
+					this.collectibles = collection;
+				}
+				else {
+					InterpretObjectAsListOfInt(extraData["collectibles"]).ForEach(item => collectibles.TryAdd(item, CollectibleType.Generic));
+				}
+			}
 
 			// optional extra data
 			List<int> InterpretObjectAsListOfInt(object data) => data is List<int> ? data as List<int> : (data is int ? new List<int>() { Convert.ToInt32(data) } : new List<int>());

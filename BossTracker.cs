@@ -283,6 +283,9 @@ namespace BossChecklist
 
 		internal void FinalizeCollectibleTypes() {
 			foreach (EntryInfo entry in SortedEntries) {
+				if (entry.modSource == "Terraria")
+					continue;
+
 				foreach (int item in entry.collectibles.Keys.ToList()) {
 					if (!ContentSamples.ItemsByType.TryGetValue(item, out Item temp))
 						continue;
@@ -505,348 +508,348 @@ namespace BossChecklist
 			#endregion
 		};
 
-		internal readonly static Dictionary<string, List<int>> EntryCollectibles = new Dictionary<string, List<int>>() {
+		internal readonly static Dictionary<string, Dictionary<int, CollectibleType>> EntryCollectibles = new Dictionary<string, Dictionary<int, CollectibleType>>() {
 			#region Boss Collectibles
 			{ "Terraria KingSlime",
-				new List<int>() {
-					ItemID.KingSlimeMasterTrophy,
-					ItemID.KingSlimePetItem,
-					ItemID.KingSlimeTrophy,
-					ItemID.KingSlimeMask,
-					ItemID.MusicBoxBoss1,
-					ItemID.MusicBoxOWBoss1
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.KingSlimeMasterTrophy, CollectibleType.Relic },
+					{ ItemID.KingSlimePetItem, CollectibleType.MasterPet },
+					{ ItemID.KingSlimeTrophy, CollectibleType.Trophy },
+					{ ItemID.KingSlimeMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss1, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss1, CollectibleType.Music },
 				}
 			},
 			{ "Terraria EyeofCthulhu",
-				new List<int>() {
-					ItemID.EyeofCthulhuMasterTrophy,
-					ItemID.EyeOfCthulhuPetItem,
-					ItemID.EyeofCthulhuTrophy,
-					ItemID.EyeMask,
-					ItemID.MusicBoxBoss1,
-					ItemID.MusicBoxOWBoss1,
-					ItemID.AviatorSunglasses,
-					ItemID.BadgersHat
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.EyeofCthulhuMasterTrophy, CollectibleType.Relic },
+					{ ItemID.EyeOfCthulhuPetItem, CollectibleType.MasterPet },
+					{ ItemID.EyeofCthulhuTrophy, CollectibleType.Trophy },
+					{ ItemID.EyeMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss1, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss1, CollectibleType.Music },
+					{ ItemID.AviatorSunglasses, CollectibleType.Generic },
+					{ ItemID.BadgersHat, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria EaterofWorlds",
-				new List<int>() {
-					ItemID.EaterofWorldsMasterTrophy,
-					ItemID.EaterOfWorldsPetItem,
-					ItemID.EaterofWorldsTrophy,
-					ItemID.EaterMask,
-					ItemID.MusicBoxBoss1,
-					ItemID.MusicBoxOWBoss1,
-					ItemID.EatersBone
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.EaterofWorldsMasterTrophy, CollectibleType.Relic },
+					{ ItemID.EaterOfWorldsPetItem, CollectibleType.MasterPet },
+					{ ItemID.EaterofWorldsTrophy, CollectibleType.Trophy },
+					{ ItemID.EaterMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss1, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss1, CollectibleType.Music },
+					{ ItemID.EatersBone, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria BrainofCthulhu",
-				new List<int>() {
-					ItemID.BrainofCthulhuMasterTrophy,
-					ItemID.BrainOfCthulhuPetItem,
-					ItemID.BrainofCthulhuTrophy,
-					ItemID.BrainMask,
-					ItemID.MusicBoxBoss3,
-					ItemID.MusicBoxOWBoss1,
-					ItemID.BoneRattle
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.BrainofCthulhuMasterTrophy, CollectibleType.Relic },
+					{ ItemID.BrainOfCthulhuPetItem, CollectibleType.MasterPet },
+					{ ItemID.BrainofCthulhuTrophy, CollectibleType.Trophy },
+					{ ItemID.BrainMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss3, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss1, CollectibleType.Music },
+					{ ItemID.BoneRattle, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria QueenBee",
-				new List<int>() {
-					ItemID.QueenBeeMasterTrophy,
-					ItemID.QueenBeePetItem,
-					ItemID.QueenBeeTrophy,
-					ItemID.BeeMask,
-					ItemID.MusicBoxBoss5,
-					ItemID.MusicBoxOWBoss1,
-					ItemID.Nectar,
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.QueenBeeMasterTrophy, CollectibleType.Relic },
+					{ ItemID.QueenBeePetItem, CollectibleType.MasterPet },
+					{ ItemID.QueenBeeTrophy, CollectibleType.Trophy },
+					{ ItemID.BeeMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss5, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss1, CollectibleType.Music },
+					{ ItemID.Nectar, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria Skeletron",
-				new List<int>() {
-					ItemID.SkeletronMasterTrophy,
-					ItemID.SkeletronPetItem,
-					ItemID.SkeletronTrophy,
-					ItemID.SkeletronMask,
-					ItemID.MusicBoxBoss1,
-					ItemID.MusicBoxOWBoss1,
-					ItemID.ChippysCouch
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.SkeletronMasterTrophy, CollectibleType.Relic },
+					{ ItemID.SkeletronPetItem, CollectibleType.MasterPet },
+					{ ItemID.SkeletronTrophy, CollectibleType.Trophy },
+					{ ItemID.SkeletronMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss1, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss1, CollectibleType.Music },
+					{ ItemID.ChippysCouch, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria Deerclops",
-				new List<int>() {
-					ItemID.DeerclopsMasterTrophy,
-					ItemID.DeerclopsPetItem,
-					ItemID.DeerclopsTrophy,
-					ItemID.DeerclopsMask,
-					ItemID.MusicBoxDeerclops,
-					ItemID.MusicBoxOWBoss1
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.DeerclopsMasterTrophy, CollectibleType.Relic },
+					{ ItemID.DeerclopsPetItem, CollectibleType.MasterPet },
+					{ ItemID.DeerclopsTrophy, CollectibleType.Trophy },
+					{ ItemID.DeerclopsMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxDeerclops, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss1, CollectibleType.Music },
 				}
 			},
 			{ "Terraria WallofFlesh",
-				new List<int>() {
-					ItemID.WallofFleshMasterTrophy,
-					ItemID.WallOfFleshGoatMountItem,
-					ItemID.WallofFleshTrophy,
-					ItemID.FleshMask,
-					ItemID.MusicBoxBoss2,
-					ItemID.MusicBoxOWWallOfFlesh,
-					ItemID.BadgersHat
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.WallofFleshMasterTrophy, CollectibleType.Relic },
+					{ ItemID.WallOfFleshGoatMountItem, CollectibleType.MasterPet },
+					{ ItemID.WallofFleshTrophy, CollectibleType.Trophy },
+					{ ItemID.FleshMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss2, CollectibleType.Music },
+					{ ItemID.MusicBoxOWWallOfFlesh, CollectibleType.Music },
+					{ ItemID.BadgersHat, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria QueenSlimeBoss",
-				new List<int>() {
-					ItemID.QueenSlimeMasterTrophy,
-					ItemID.QueenSlimePetItem,
-					ItemID.QueenSlimeTrophy,
-					ItemID.QueenSlimeMask,
-					ItemID.MusicBoxQueenSlime,
-					ItemID.MusicBoxOWBoss2
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.QueenSlimeMasterTrophy, CollectibleType.Relic },
+					{ ItemID.QueenSlimePetItem, CollectibleType.MasterPet },
+					{ ItemID.QueenSlimeTrophy, CollectibleType.Trophy },
+					{ ItemID.QueenSlimeMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxQueenSlime, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss2, CollectibleType.Music },
 				}
 			},
 			{ "Terraria TheTwins",
-				new List<int>() {
-					ItemID.TwinsMasterTrophy,
-					ItemID.TwinsPetItem,
-					ItemID.RetinazerTrophy,
-					ItemID.SpazmatismTrophy,
-					ItemID.TwinMask,
-					ItemID.MusicBoxBoss2,
-					ItemID.MusicBoxOWBoss2
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.TwinsMasterTrophy, CollectibleType.Relic },
+					{ ItemID.TwinsPetItem, CollectibleType.MasterPet },
+					{ ItemID.RetinazerTrophy, CollectibleType.Trophy },
+					{ ItemID.SpazmatismTrophy, CollectibleType.Trophy },
+					{ ItemID.TwinMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss2, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss2, CollectibleType.Music },
 				}
 			},
 			{ "Terraria TheDestroyer",
-				new List<int>() {
-					ItemID.DestroyerMasterTrophy,
-					ItemID.DestroyerPetItem,
-					ItemID.DestroyerTrophy,
-					ItemID.DestroyerMask,
-					ItemID.MusicBoxBoss3,
-					ItemID.MusicBoxOWBoss2
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.DestroyerMasterTrophy, CollectibleType.Relic },
+					{ ItemID.DestroyerPetItem, CollectibleType.MasterPet },
+					{ ItemID.DestroyerTrophy, CollectibleType.Trophy },
+					{ ItemID.DestroyerMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss3, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss2, CollectibleType.Music },
 				}
 			},
 			{ "Terraria SkeletronPrime",
-				new List<int>() {
-					ItemID.SkeletronPrimeMasterTrophy,
-					ItemID.SkeletronPrimePetItem,
-					ItemID.SkeletronPrimeTrophy,
-					ItemID.SkeletronPrimeMask,
-					ItemID.MusicBoxBoss1,
-					ItemID.MusicBoxOWBoss2
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.SkeletronPrimeMasterTrophy, CollectibleType.Relic },
+					{ ItemID.SkeletronPrimePetItem, CollectibleType.MasterPet },
+					{ ItemID.SkeletronPrimeTrophy, CollectibleType.Trophy },
+					{ ItemID.SkeletronPrimeMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss1, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss2, CollectibleType.Music },
 				}
 			},
 			{ "Terraria Plantera",
-				new List<int>() {
-					ItemID.PlanteraMasterTrophy,
-					ItemID.PlanteraPetItem,
-					ItemID.PlanteraTrophy,
-					ItemID.PlanteraMask,
-					ItemID.MusicBoxPlantera,
-					ItemID.MusicBoxOWPlantera,
-					ItemID.Seedling
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.PlanteraMasterTrophy, CollectibleType.Relic },
+					{ ItemID.PlanteraPetItem, CollectibleType.MasterPet },
+					{ ItemID.PlanteraTrophy, CollectibleType.Trophy },
+					{ ItemID.PlanteraMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxPlantera, CollectibleType.Music },
+					{ ItemID.MusicBoxOWPlantera, CollectibleType.Music },
+					{ ItemID.Seedling, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria Golem",
-				new List<int>() {
-					ItemID.GolemMasterTrophy,
-					ItemID.GolemPetItem,
-					ItemID.GolemTrophy,
-					ItemID.GolemMask,
-					ItemID.MusicBoxBoss5,
-					ItemID.MusicBoxOWBoss2
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.GolemMasterTrophy, CollectibleType.Relic },
+					{ ItemID.GolemPetItem, CollectibleType.MasterPet },
+					{ ItemID.GolemTrophy, CollectibleType.Trophy },
+					{ ItemID.GolemMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss5, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss2, CollectibleType.Music },
 				}
 			},
 			{ "Terraria HallowBoss",
-				new List<int>() {
-					ItemID.FairyQueenMasterTrophy,
-					ItemID.FairyQueenPetItem,
-					ItemID.FairyQueenTrophy,
-					ItemID.FairyQueenMask,
-					ItemID.MusicBoxEmpressOfLight,
-					ItemID.MusicBoxOWBoss2,
-					ItemID.HallowBossDye,
-					ItemID.RainbowCursor,
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.FairyQueenMasterTrophy, CollectibleType.Relic },
+					{ ItemID.FairyQueenPetItem, CollectibleType.MasterPet },
+					{ ItemID.FairyQueenTrophy, CollectibleType.Trophy },
+					{ ItemID.FairyQueenMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxEmpressOfLight, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss2, CollectibleType.Music },
+					{ ItemID.HallowBossDye, CollectibleType.Generic },
+					{ ItemID.RainbowCursor, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria DD2Betsy",
-				new List<int>() {
-					ItemID.BetsyMasterTrophy,
-					ItemID.DD2BetsyPetItem,
-					ItemID.BossTrophyBetsy,
-					ItemID.BossMaskBetsy,
-					ItemID.MusicBoxDD2,
-					ItemID.MusicBoxOWInvasion
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.BetsyMasterTrophy, CollectibleType.Relic },
+					{ ItemID.DD2BetsyPetItem, CollectibleType.MasterPet },
+					{ ItemID.BossTrophyBetsy, CollectibleType.Trophy },
+					{ ItemID.BossMaskBetsy, CollectibleType.MasterPet },
+					{ ItemID.MusicBoxDD2, CollectibleType.Music },
+					{ ItemID.MusicBoxOWInvasion, CollectibleType.Music },
 				}
 			},
 			{ "Terraria DukeFishron",
-				new List<int>() {
-					ItemID.DukeFishronMasterTrophy,
-					ItemID.DukeFishronPetItem,
-					ItemID.DukeFishronTrophy,
-					ItemID.DukeFishronMask,
-					ItemID.MusicBoxDukeFishron,
-					ItemID.MusicBoxOWBoss2
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.DukeFishronMasterTrophy, CollectibleType.Relic },
+					{ ItemID.DukeFishronPetItem, CollectibleType.MasterPet },
+					{ ItemID.DukeFishronTrophy, CollectibleType.Trophy },
+					{ ItemID.DukeFishronMask, CollectibleType.Mask },
+					{ ItemID.MusicBoxDukeFishron, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss2, CollectibleType.Music },
 				}
 			},
 			{ "Terraria CultistBoss",
-				new List<int>() {
-					ItemID.LunaticCultistMasterTrophy,
-					ItemID.LunaticCultistPetItem,
-					ItemID.AncientCultistTrophy,
-					ItemID.BossMaskCultist,
-					ItemID.MusicBoxBoss5,
-					ItemID.MusicBoxOWBoss2
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.LunaticCultistMasterTrophy, CollectibleType.Relic },
+					{ ItemID.LunaticCultistPetItem, CollectibleType.MasterPet },
+					{ ItemID.AncientCultistTrophy, CollectibleType.Trophy },
+					{ ItemID.BossMaskCultist, CollectibleType.Mask },
+					{ ItemID.MusicBoxBoss5, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBoss2, CollectibleType.Music },
 				}
 			},
 			{ "Terraria MoonLord",
-				new List<int>() {
-					ItemID.MoonLordMasterTrophy,
-					ItemID.MoonLordPetItem,
-					ItemID.MoonLordTrophy,
-					ItemID.BossMaskMoonlord,
-					ItemID.MusicBoxLunarBoss,
-					ItemID.MusicBoxOWMoonLord
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MoonLordMasterTrophy, CollectibleType.Relic },
+					{ ItemID.MoonLordPetItem, CollectibleType.MasterPet },
+					{ ItemID.MoonLordTrophy, CollectibleType.Trophy },
+					{ ItemID.BossMaskMoonlord, CollectibleType.Mask },
+					{ ItemID.MusicBoxLunarBoss, CollectibleType.Music },
+					{ ItemID.MusicBoxOWMoonLord, CollectibleType.Music },
 				}
 			},
 			#endregion
 			#region Mini-boss Collectibles
 			{ "Terraria DD2DarkMageT3",
-				new List<int>() {
-					ItemID.DarkMageMasterTrophy,
-					ItemID.DarkMageBookMountItem,
-					ItemID.BossTrophyDarkmage,
-					ItemID.BossMaskDarkMage,
-					ItemID.DD2PetDragon,
-					ItemID.DD2PetGato
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.DarkMageMasterTrophy, CollectibleType.Relic },
+					{ ItemID.DarkMageBookMountItem, CollectibleType.MasterPet },
+					{ ItemID.BossTrophyDarkmage, CollectibleType.Trophy },
+					{ ItemID.BossMaskDarkMage, CollectibleType.Mask },
+					{ ItemID.DD2PetDragon, CollectibleType.Generic },
+					{ ItemID.DD2PetGato, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria PirateShip",
-				new List<int>() {
-					ItemID.FlyingDutchmanMasterTrophy,
-					ItemID.PirateShipMountItem,
-					ItemID.FlyingDutchmanTrophy
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.FlyingDutchmanMasterTrophy, CollectibleType.Relic },
+					{ ItemID.PirateShipMountItem, CollectibleType.MasterPet },
+					{ ItemID.FlyingDutchmanTrophy, CollectibleType.Trophy },
 				}
 			},
 			{ "Terraria DD2OgreT3",
-				new List<int>() {
-					ItemID.OgreMasterTrophy,
-					ItemID.DD2OgrePetItem,
-					ItemID.BossTrophyOgre,
-					ItemID.BossMaskOgre,
-					ItemID.DD2PetGhost
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.OgreMasterTrophy, CollectibleType.Relic },
+					{ ItemID.DD2OgrePetItem, CollectibleType.MasterPet },
+					{ ItemID.BossTrophyOgre, CollectibleType.Trophy },
+					{ ItemID.BossMaskOgre, CollectibleType.Mask },
+					{ ItemID.DD2PetGhost, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria MourningWood",
-				new List<int>() {
-					ItemID.MourningWoodMasterTrophy,
-					ItemID.SpookyWoodMountItem,
-					ItemID.MourningWoodTrophy,
-					ItemID.CursedSapling
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MourningWoodMasterTrophy, CollectibleType.Relic },
+					{ ItemID.SpookyWoodMountItem, CollectibleType.MasterPet },
+					{ ItemID.MourningWoodTrophy, CollectibleType.Trophy },
+					{ ItemID.CursedSapling, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria Pumpking",
-				new List<int>() {
-					ItemID.PumpkingMasterTrophy,
-					ItemID.PumpkingPetItem,
-					ItemID.PumpkingTrophy,
-					ItemID.SpiderEgg
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.PumpkingMasterTrophy, CollectibleType.Relic },
+					{ ItemID.PumpkingPetItem, CollectibleType.MasterPet },
+					{ ItemID.PumpkingTrophy, CollectibleType.Trophy },
+					{ ItemID.SpiderEgg, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria Everscream",
-				new List<int>() {
-					ItemID.EverscreamMasterTrophy,
-					ItemID.EverscreamPetItem,
-					ItemID.EverscreamTrophy
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.EverscreamMasterTrophy, CollectibleType.Relic },
+					{ ItemID.EverscreamPetItem, CollectibleType.MasterPet },
+					{ ItemID.EverscreamTrophy, CollectibleType.Trophy },
 				}
 			},
 			{ "Terraria SantaNK1",
-				new List<int>() {
-					ItemID.SantankMasterTrophy,
-					ItemID.SantankMountItem,
-					ItemID.SantaNK1Trophy
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.SantankMasterTrophy, CollectibleType.Relic },
+					{ ItemID.SantankMountItem, CollectibleType.MasterPet },
+					{ ItemID.SantaNK1Trophy, CollectibleType.Trophy },
 				}
 			},
 			{ "Terraria IceQueen",
-				new List<int>() {
-					ItemID.IceQueenMasterTrophy,
-					ItemID.IceQueenPetItem,
-					ItemID.IceQueenTrophy,
-					ItemID.BabyGrinchMischiefWhistle
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.IceQueenMasterTrophy, CollectibleType.Relic },
+					{ ItemID.IceQueenPetItem, CollectibleType.MasterPet },
+					{ ItemID.IceQueenTrophy, CollectibleType.Trophy },
+					{ ItemID.BabyGrinchMischiefWhistle, CollectibleType.Generic },
 				}
 			},
 			{ "Terraria MartianSaucer",
-				new List<int>() {
-					ItemID.UFOMasterTrophy,
-					ItemID.MartianPetItem,
-					ItemID.MartianSaucerTrophy
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.UFOMasterTrophy, CollectibleType.Relic },
+					{ ItemID.MartianPetItem, CollectibleType.MasterPet },
+					{ ItemID.MartianSaucerTrophy, CollectibleType.Trophy },
 				}
 			},
 			#endregion
 			#region Event Collectibles
 			{ "Terraria TorchGod",
-				new List<int>() {
-					ItemID.MusicBoxBoss3,
-					ItemID.MusicBoxOWWallOfFlesh
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxBoss3, CollectibleType.Music },
+					{ ItemID.MusicBoxOWWallOfFlesh, CollectibleType.Music },
 				}
 			},
 			{ "Terraria BloodMoon",
-				new List<int>() {
-					ItemID.MusicBoxEerie,
-					ItemID.MusicBoxOWBloodMoon
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxEerie, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBloodMoon, CollectibleType.Music },
 				}
 			},
 			{ "Terraria GoblinArmy",
-				new List<int>() {
-					ItemID.MusicBoxGoblins,
-					ItemID.MusicBoxOWInvasion
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxGoblins, CollectibleType.Music },
+					{ ItemID.MusicBoxOWInvasion, CollectibleType.Music },
 				}
 			},
 			{ "Terraria OldOnesArmy",
-				new List<int>() {
-					ItemID.MusicBoxDD2,
-					ItemID.MusicBoxOWInvasion
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxDD2, CollectibleType.Music },
+					{ ItemID.MusicBoxOWInvasion, CollectibleType.Music },
 				}
 			},
 			{ "Terraria FrostLegion",
-				new List<int>() {
-					ItemID.MusicBoxBoss3,
-					ItemID.MusicBoxOWInvasion
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxBoss3, CollectibleType.Music },
+					{ ItemID.MusicBoxOWInvasion, CollectibleType.Music },
 				}
 			},
 			{ "Terraria Eclipse",
-				new List<int>() {
-					ItemID.MusicBoxEclipse,
-					ItemID.MusicBoxOWBloodMoon
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxEclipse, CollectibleType.Music },
+					{ ItemID.MusicBoxOWBloodMoon, CollectibleType.Music },
 				}
 			},
 			{ "Terraria PirateInvasion",
-				new List<int>() {
-					ItemID.MusicBoxPirates,
-					ItemID.MusicBoxOWInvasion
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxPirates, CollectibleType.Music },
+					{ ItemID.MusicBoxOWInvasion, CollectibleType.Music },
 				}
 			},
 			{ "Terraria PumpkinMoon",
-				new List<int>() {
-					ItemID.MusicBoxPumpkinMoon,
-					ItemID.MusicBoxOWInvasion
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxPumpkinMoon, CollectibleType.Music },
+					{ ItemID.MusicBoxOWInvasion, CollectibleType.Music },
 				}
 			},
 			{ "Terraria FrostMoon",
-				new List<int>() {
-					ItemID.MusicBoxFrostMoon,
-					ItemID.MusicBoxOWInvasion
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxFrostMoon, CollectibleType.Music },
+					{ ItemID.MusicBoxOWInvasion, CollectibleType.Music },
 				}
 			},
 			{ "Terraria MartianMadness",
-				new List<int>() {
-					ItemID.MusicBoxMartians,
-					ItemID.MusicBoxOWInvasion
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxMartians, CollectibleType.Music },
+					{ ItemID.MusicBoxOWInvasion, CollectibleType.Music },
 				}
 			},
 			{ "Terraria LunarEvent",
-				new List<int>() {
-					ItemID.MusicBoxTowers,
-					ItemID.MusicBoxOWTowers
+				new Dictionary<int, CollectibleType>() {
+					{ ItemID.MusicBoxTowers, CollectibleType.Music },
+					{ ItemID.MusicBoxOWTowers, CollectibleType.Music },
 				}
 			}
 			#endregion
