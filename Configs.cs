@@ -78,7 +78,7 @@ namespace BossChecklist
 		public bool AutomaticChecklist { get; set; }
 
 		[BackgroundColor(255, 99, 71)]
-		[DefaultValue(true)]
+		[DefaultValue(false)]
 		public bool ProgressiveChecklist { get; set; }
 
 		[BackgroundColor(255, 99, 71)]
