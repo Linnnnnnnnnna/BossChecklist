@@ -263,7 +263,7 @@ namespace BossChecklist
 			}
 			else if (Main.netMode == NetmodeID.Server) {
 				// Send a packet to all multiplayer clients. Moon messages are client based, so they will need to read their own configs to determine the message.
-				foreach (Player player in Main.player.Where(p => p.active)) {
+				foreach (Player player in Main.ActivePlayers) {
 					ModPacket packet = BossChecklist.instance.GetPacket();
 					packet.Write((byte)PacketMessageType.SendClientConfigMessage);
 					packet.Write((byte)ClientMessageType.Moon);
@@ -297,7 +297,7 @@ namespace BossChecklist
 					else if (Main.netMode == NetmodeID.Server) {
 						//ChatHelper.BroadcastChatMessage(NetworkText.FromLiteral(message.Format(npc.FullName)), Colors.RarityPurple);
 						// Send a packet to all multiplayer clients. Limb messages are client based, so they will need to read their own configs to determine the message.
-						foreach (Player player in Main.player.Where(p => p.active)) {
+						foreach (Player player in Main.ActivePlayers) {
 							ModPacket packet = BossChecklist.instance.GetPacket();
 							packet.Write((byte)PacketMessageType.SendClientConfigMessage);
 							packet.Write((byte)ClientMessageType.Despawn);
@@ -315,7 +315,7 @@ namespace BossChecklist
 					Main.LocalPlayer.GetModPlayer<PlayerAssist>().RecordsForWorld?[recordIndex].StopTracking(false, npc.playerInteraction[Main.LocalPlayer.whoAmI]);
 				}
 				else if (Main.netMode is NetmodeID.Server) {
-					foreach (Player player in Main.player.Where(x => x.active)) {
+					foreach (Player player in Main.ActivePlayers) {
 						BossChecklist.ServerCollectedRecords[player.whoAmI][recordIndex].StopTracking_Server(player.whoAmI, false, npc.playerInteraction[player.whoAmI]);
 					}
 					WorldRecordsForWorld[recordIndex].UpdateGlobalDeaths(npc.playerInteraction.GetTrueIndexes());

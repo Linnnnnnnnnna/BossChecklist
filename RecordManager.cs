@@ -587,8 +587,8 @@ namespace BossChecklist
 			if (Main.netMode != NetmodeID.Server)
 				return; // Only the server should be able to adjust world records
 
-			foreach (Player player in Main.player) {
-				if (!player.active || !playersInteracted.Contains(player.whoAmI))
+			foreach (Player player in Main.ActivePlayers) {
+				if (!playersInteracted.Contains(player.whoAmI))
 					continue;
 
 				PersonalRecords playerRecords = BossChecklist.ServerCollectedRecords[player.whoAmI][RecordIndex];
@@ -596,10 +596,7 @@ namespace BossChecklist
 			}
 
 			// updates need to be sent to ALL players
-			foreach (Player player in Main.player) {
-				if (!player.active)
-					continue;
-
+			foreach (Player player in Main.ActivePlayers) {
 				ModPacket packet = BossChecklist.instance.GetPacket();
 				packet.Write((byte)PacketMessageType.UpdateWorldRecordsToAllPlayers);
 				packet.Write(RecordIndex);
@@ -623,8 +620,8 @@ namespace BossChecklist
 			List<int> WorldRecordAchieved_HitsTaken = new List<int>();
 
 			// only players that have interacted with the boss should have their deaths and records added
-			foreach (Player player in Main.player) {
-				if (!player.active || !playersInteracted.Contains(player.whoAmI))
+			foreach (Player player in Main.ActivePlayers) {
+				if (!playersInteracted.Contains(player.whoAmI))
 					continue;
 
 				PersonalRecords playerRecords = BossChecklist.ServerCollectedRecords[player.whoAmI][RecordIndex];
@@ -666,10 +663,7 @@ namespace BossChecklist
 			}
 
 			// updates need to be sent to ALL players
-			foreach (Player player in Main.player) {
-				if (!player.active)
-					continue;
-
+			foreach (Player player in Main.ActivePlayers) {
 				ModPacket packet = BossChecklist.instance.GetPacket();
 				packet.Write((byte)PacketMessageType.UpdateWorldRecordsToAllPlayers);
 				packet.Write(RecordIndex);

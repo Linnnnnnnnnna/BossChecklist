@@ -22,7 +22,7 @@ namespace BossChecklist
 				Main.LocalPlayer.GetModPlayer<PlayerAssist>().RecordsForWorld?[recordIndex].StartTracking(); // start tracking for active players
 			}
 			else if (Main.netMode is NetmodeID.Server) {
-				foreach (Player player in Main.player.Where(x => x.active)) {
+				foreach (Player player in Main.ActivePlayers) {
 					BossChecklist.ServerCollectedRecords[player.whoAmI][recordIndex].StartTracking_Server(player.whoAmI);
 				}
 			}
@@ -50,7 +50,7 @@ namespace BossChecklist
 				}
 				else if (Main.netMode == NetmodeID.Server) {
 					// Send a packet to all multiplayer clients. Limb messages are client based, so they will need to read their own configs to determine the message.
-					foreach (Player player in Main.player.Where(p => p.active)) {
+					foreach (Player player in Main.ActivePlayers) {
 						ModPacket packet = BossChecklist.instance.GetPacket();
 						packet.Write((byte)PacketMessageType.SendClientConfigMessage);
 						packet.Write((byte)ClientMessageType.Limb);
@@ -74,7 +74,7 @@ namespace BossChecklist
 				Main.LocalPlayer.GetModPlayer<PlayerAssist>().RecordsForWorld?[recordIndex].StopTracking(interaction && BossChecklist.FeatureConfig.AllowNewRecords, interaction);
 			}
 			else if (Main.netMode is NetmodeID.Server) {
-				foreach (Player player in Main.player.Where(x => x.active)) {
+				foreach (Player player in Main.ActivePlayers) {
 					bool interaction = npc.playerInteraction[player.whoAmI];
 					if (BossChecklist.ServerCollectedRecords[player.whoAmI][recordIndex].StopTracking_Server(player.whoAmI, interaction && BossChecklist.Server_AllowNewRecords[player.whoAmI], interaction))
 						newPersonalBestOnServer = true; // if any player gets a new persoanl best on the server...
