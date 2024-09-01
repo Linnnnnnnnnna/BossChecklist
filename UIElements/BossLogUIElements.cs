@@ -89,6 +89,8 @@ namespace BossChecklist.UIElements
 			internal bool dragging;
 			internal Color? borderColor;
 
+			PlayerAssist GetModPlayer => Main.LocalPlayer.GetModPlayer<PlayerAssist>();
+
 			public OpenLogButton(Asset<Texture2D> texture) : base(texture) {
 				Width.Pixels = texture.Value.Width;
 				Height.Pixels = texture.Value.Height;
@@ -126,6 +128,7 @@ namespace BossChecklist.UIElements
 			}
 
 			public override void Update(GameTime gameTime) {
+				borderColor = null;
 				// Determine a border color for the button
 				if (IsMouseHovering || dragging) {
 					borderColor = Color.Goldenrod; // If hovering over or dragging the button, the book will be highlighted in a gold border
@@ -133,16 +136,8 @@ namespace BossChecklist.UIElements
 				else if (!BossChecklist.FeatureConfig.RecordTrackingEnabled || !BossChecklist.FeatureConfig.AllowNewRecords) { // configs can be checked as it is checked from a client
 					borderColor = Color.Firebrick; // If Records are disabled in any way, the book will be highlighted with a red border
 				}
-				else {
-					PlayerAssist modPlayer = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
-					if (!modPlayer.hasOpenedTheBossLog || modPlayer.hasNewRecord.Any(x => x == true)) {
-						Color coverColor = BossChecklist.BossLogConfig.BossLogColor;
-						float modifier = Main.masterColor / 200f; // If the player has not opened the log or has not viewed a new record page, the book will be hightlighted with a flashing log-colored border
-						borderColor = new Color(coverColor.R * modifier, coverColor.G * modifier, coverColor.B * modifier);
-					}
-					else {
-						borderColor = null;
-					}
+				else if (!GetModPlayer.hasOpenedTheBossLog || (BossChecklist.FeatureConfig.NewRecordLogGlow && GetModPlayer.hasNewRecord.Contains(true))) {
+					borderColor = Main.DiscoColor;
 				}
 
 				base.Update(gameTime);
@@ -1368,8 +1363,8 @@ namespace BossChecklist.UIElements
 				Rectangle inner = GetInnerDimensions().ToRectangle();
 				Vector2 pos = new Vector2(inner.X - 20, inner.Y - 5);
 
-				if (entry.IsRecordIndexed(out int recordIndex) && Main.LocalPlayer.GetModPlayer<PlayerAssist>().hasNewRecord[recordIndex])
-					this.TextColor = Main.DiscoColor; // constantly updates
+				if (BossChecklist.FeatureConfig.NewRecordLogGlow && entry.IsRecordIndexed(out int recordIndex) && GetParentLog.GetModPlayer.hasNewRecord[recordIndex])
+					this.TextColor = Main.DiscoColor;
 
 				// base drawing comes after colors so they do not flicker when updating check list
 				base.Draw(spriteBatch);

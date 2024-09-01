@@ -585,6 +585,16 @@ Mods: {
 						'''
 				}
 
+				NewRecordLogGlow: {
+					// Label: Enable New Record Log Glow
+					/* Tooltip:
+						'''
+						When enabled, setting a new record will put a rainbow glow on the following:
+						- Boss Log button
+						- Table of Contents entry name
+						''' */
+				}
+
 				TimeValueFormat: {
 					Label: Формат временного значения
 					Tooltip:

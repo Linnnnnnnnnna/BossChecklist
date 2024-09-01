@@ -300,6 +300,10 @@ namespace BossChecklist
 			}
 		}
 
+
+		[DefaultValue(true)]
+		public bool NewRecordLogGlow { get; set; }
+
 		[DrawTicks]
 		[OptionStrings(new string[] { "Standard", "Simple" })]
 		[DefaultValue("Standard")]
