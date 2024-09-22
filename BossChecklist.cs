@@ -267,7 +267,7 @@ namespace BossChecklist
 			return "Failure";
 
 			// Local functions.
-			List<int> InterpretObjectAsListOfInt(object data) => data is List<int> ? data as List<int> : (data is int ? new List<int>() { Convert.ToInt32(data) } : null);
+			List<int> InterpretObjectAsListOfInt(object data) => data is List<int> ? data as List<int> : new List<int>() { Convert.ToInt32(data) };
 
 			void AddToOldCalls(string message, string name) {
 				// TODO: maybe spam the log if ModCompile.activelyModding (needs reflection)
