@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using BossChecklist.UIElements;
+﻿using BossChecklist.UIElements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Graphics;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Graphics;
@@ -163,13 +162,18 @@ namespace BossChecklist
 						PlayerAssist modplayer = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
 						if (modplayer.RecordsForWorld is not List<PersonalRecords> personalrecords || !modplayer.PlayerRecordsInitialized)
 							return true;
-						
+
 						string debugText =
-							$"[#{entry.GetIndex}] {entry.DisplayName} [{recordIndex}]" +
-							$"\nTime: {PersonalRecords.TimeConversion(personalrecords[recordIndex].Tracker_Duration)}" +
-							$"\nHits Taken: {personalrecords[recordIndex].Tracker_HitsTaken}" +
-							$"\nDeaths: {personalrecords[recordIndex].Tracker_Deaths}";
-						Main.spriteBatch.DrawString(FontAssets.MouseText.Value, debugText, new Vector2(20, Main.screenHeight - 175), Color.Tomato);
+							$"Boss Checklist: Record Tracker" +
+							$"\n[#{entry.GetIndex}] {entry.DisplayName} ({recordIndex})" +
+							$"\n{(personalrecords[recordIndex].Tracker_Deaths > 0 ? $"[i:{ItemID.Tombstone}] {personalrecords[recordIndex].Tracker_Deaths} " : "")}" +
+							$"[i:{ItemID.ArmorBracing}] {personalrecords[recordIndex].Tracker_HitsTaken} " +
+							$"[i:{ItemID.Stopwatch}] {PersonalRecords.TimeConversion(personalrecords[recordIndex].Tracker_Duration)}";
+
+						Vector2 barCenter = Main.ScreenSize.ToVector2() * new Vector2(0.5f, 1f) + new Vector2(0f, -50f);
+						Vector2 debugPos = Utils.CenteredRectangle(barCenter, new Vector2(456, 22)).TopLeft() - new Vector2(0, 24);
+						debugPos.Y -= FontAssets.MouseText.Value.MeasureString(debugText).Y;
+						Utils.DrawBorderString(Main.spriteBatch, debugText, debugPos, Color.Tomato);
 						return true;
 					},
 					InterfaceScaleType.UI)
